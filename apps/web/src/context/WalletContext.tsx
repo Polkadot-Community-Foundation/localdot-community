@@ -2,10 +2,11 @@
  * Wallet Context
  *
  * App runs inside the Polkadot Triangle iframe. We use the host's product-
- * account flow (`accounts.getProductAccount(window.location.host, 0)`),
+ * account flow (`accounts.getProductAccount(getProductIdentifier(), 0)`),
  * which is the only signing path Polkadot Desktop currently wires up
- * end-to-end. The derived address is stable per product identifier
- * (dotNS hostname in prod, `localhost:PORT` in dev).
+ * end-to-end. The derived address is stable per product identifier — the bare
+ * dotNS domain (VITE_DOTNS_ID) in prod, `localhost:PORT` in dev. See
+ * lib/host/product-identifier.ts for why we don't use window.location.host.
  */
 import { accounts } from "@novasamatech/host-api-wrapper";
 import type { PolkadotSigner } from "polkadot-api/signer";

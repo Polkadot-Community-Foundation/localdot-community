@@ -24,6 +24,7 @@ interface ImportMetaEnv {
   readonly VITE_REAL_TRADE?: string;
   readonly VITE_ZKPASSPORT_DOMAIN?: string;
   readonly VITE_ZKPASSPORT_DEV_MODE?: string;
+  readonly VITE_DOTNS_ID?: string;
 }
 
 interface ImportMeta {

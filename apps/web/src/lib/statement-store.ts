@@ -57,6 +57,7 @@ import {
 
 import { type BootstrapStep, ensureBootstrap } from "./host/allowances";
 import { activeNetwork } from "./host/networks";
+import { getProductIdentifier } from "./host/product-identifier";
 
 type Topic = ReturnType<typeof stringToTopic>;
 
@@ -416,10 +417,7 @@ export function inboxTopics(evmAddress: string): readonly [Topic, Topic] {
 const hostStatementStore = createStatementStore();
 
 function getProductAccountId(): [string, number] {
-  if (typeof window === "undefined") {
-    throw new Error("Statement store requires a window context");
-  }
-  return [window.location.host, 0];
+  return [getProductIdentifier(), 0];
 }
 
 function hexToBytes(hex: string): Uint8Array {

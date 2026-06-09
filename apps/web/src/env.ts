@@ -21,6 +21,14 @@ interface Env {
   VITE_USE_HOST_API?: boolean;
   /** zkpassport domain for verification (defaults to demo.zkpassport.id in dev) */
   VITE_ZKPASSPORT_DOMAIN?: string;
+  /**
+   * Canonical DotNS product identifier the host knows this product by — the bare
+   * registered domain (e.g. `mylocaldot.dot`). Baked at build time by the deploy
+   * (set to the chosen domain, the same value the manifest is published with) and
+   * used as the product-account identifier for host signing. When unset, the host
+   * signer falls back to `window.location.host` so local dev / e2e keep working.
+   */
+  VITE_DOTNS_ID?: string;
 }
 
 // Alice's well-known SS58 — always pre-mapped on Substrate testnets, used as
@@ -48,6 +56,8 @@ function getEnv(): Env {
     // zkpassport domain - defaults to demo in dev
     VITE_ZKPASSPORT_DOMAIN:
       import.meta.env.VITE_ZKPASSPORT_DOMAIN || "demo.zkpassport.id",
+    // Bare DotNS domain for host signing; falls back to window.location.host in dev
+    VITE_DOTNS_ID: import.meta.env.VITE_DOTNS_ID,
   };
 }
 

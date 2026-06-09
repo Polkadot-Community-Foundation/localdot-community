@@ -2,8 +2,11 @@
  * Host API signer — Paseo Next v2 / Polkadot Desktop 0.7.9+ / Polkadot App iOS v2.
  *
  * Uses the product-account flow with the modern `createTransaction` slot:
- *  - `accounts.getProductAccount(window.location.host, 0)` resolves the
- *    product-derived account from the host.
+ *  - `accounts.getProductAccount(getProductIdentifier(), 0)` resolves the
+ *    product-derived account from the host. The identifier is the bare DotNS
+ *    domain (VITE_DOTNS_ID, baked at deploy time), NOT window.location.host —
+ *    see lib/host/product-identifier.ts for why the raw origin mismatches the
+ *    host's grant on a real deploy.
  *  - `accounts.getProductAccountSigner(account, 'createTransaction')` returns a
  *    `PolkadotSigner` whose `signTx` forwards EVERY signed-extension's real
  *    `extra` + `additionalSigned` bytes (computed by PAPI against the live
@@ -29,6 +32,8 @@ import { accounts } from "@novasamatech/host-api-wrapper";
 import { AccountId } from "polkadot-api";
 import type { PolkadotSigner } from "polkadot-api/signer";
 
+import { getProductIdentifier } from "./product-identifier";
+
 const accountIdCodec = AccountId();
 const DERIVATION_INDEX = 0;
 
@@ -39,19 +44,6 @@ interface HostAccount {
 }
 
 let cachedAccount: HostAccount | null = null;
-
-function getProductIdentifier(): string {
-  if (typeof window === "undefined") {
-    throw new Error("Host signer requires a window context");
-  }
-  const identifier = window.location.host;
-  if (!identifier) {
-    throw new Error(
-      "Could not determine product identifier from window.location.host",
-    );
-  }
-  return identifier;
-}
 
 async function buildHostSigner(): Promise<HostAccount> {
   if (cachedAccount) return cachedAccount;

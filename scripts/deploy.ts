@@ -201,10 +201,16 @@ function buildContract(): void {
   ui.success("P2PMarket compiled.");
 }
 
-function runBuild(): void {
+function runBuild(domain: string): void {
   ui.section("Build");
   ui.step("Building the web app (vite)…");
-  pnpm(["--filter", "@localdot/web", "build"], "web build");
+  // Bake the bare chosen domain into the bundle as the host product identifier
+  // (VITE_DOTNS_ID). The host grants the product account/allowance against this
+  // bare domain — the same value the manifest is published with — so signing must
+  // use it rather than window.location.host, which is app.<domain> at runtime.
+  pnpm(["--filter", "@localdot/web", "build"], "web build", {
+    VITE_DOTNS_ID: domain,
+  });
   if (!existsSync(resolve(WEB_DIST, "index.html"))) {
     throw new Error(`Build did not produce ${WEB_DIST}/index.html.`);
   }
@@ -337,7 +343,7 @@ async function main(): Promise<void> {
       domain = normalizeDomain(answer);
     }
 
-    runBuild();
+    runBuild(domain);
     await ensureMnemonicSigner(rl, bulletinDeploy);
     publishDapp(bulletinDeploy, domain, seed);
 
