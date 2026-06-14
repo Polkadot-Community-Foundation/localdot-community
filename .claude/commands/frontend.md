@@ -154,7 +154,7 @@ standalone-browser wallet flow, no `window.ethereum`, and no
   `additionalSigned` bytes to `host.createTransaction`.
 
 > Note: the legacy `signPayload` / `polkadot-api/pjs-signer` path was abandoned.
-> Asset Hub Next declares custom signed-extensions (`AuthorizeCall`, `AsPgas`,
+> Summit Asset Hub declares custom signed-extensions (`AuthorizeCall`, `AsPgas`,
 > `AsRingAlias`, `EthSetOrigin`, …) that pjs-signer can't encode; the iOS legacy
 > builder silently drops `EthSetOrigin` (the H160 origin `Revive.call` needs) →
 > `BadProof`. There is no `@novasamatech/product-sdk` and no `injectSpektrExtension`.
@@ -190,7 +190,7 @@ export async function getHostSignerAndAddress(): Promise<{
 ([`lib/host/allowances.ts`](../../apps/web/src/lib/host/allowances.ts)) must have
 granted `SmartContractAllowance` (derivation index 0) — that allowance only
 **auto-signs** the `Revive.call` (skips the per-call modal); it is **not** gas
-sponsorship, so the product account must hold native PAS (faucet on testnet).
+sponsorship, so the product account must hold native SUM (faucet on testnet).
 
 ---
 
@@ -199,12 +199,12 @@ sponsorship, so the product account must hold native PAS (faucet on testnet).
 > Note: this app does **not** use ethers as a wallet or RPC transport, and there
 > is no `lib/contracts.ts` / `ESCROW_ABI` / `getEscrowContract` / `VITE_ESCROW_ADDRESS`.
 > The single contract is **P2PMarket** (there is no separate escrow contract);
-> the escrowed asset is the **chain native token** (PAS) sent via `msg.value`,
+> the escrowed asset is the **chain native token** (SUM) sent via `msg.value`,
 > not an ERC-20. ethers v6 is used **only** to ABI encode/decode calldata
 > (`new ethers.Interface(abi)`); all chain access is PAPI over WSS.
 
 P2PMarket runs on PolkaVM via Revive. Both reads and writes go through PAPI
-against Asset Hub Next — there is no EVM JSON-RPC provider in the app and no
+against Summit Asset Hub — there is no EVM JSON-RPC provider in the app and no
 `window.ethereum`. The ABI lives at
 [`apps/web/src/abi/P2PMarket.json`](../../apps/web/src/abi/P2PMarket.json) and the
 address comes from `env.VITE_P2PMARKET_ADDRESS`.
@@ -265,7 +265,7 @@ export function useEscrow() {
     const wallet = getSignerAndAddress();
     if (!wallet) throw new Error('Wallet not connected or read-only.');
     const { parseUnits } = await import('ethers');
-    const amountWei = parseUnits(params.amount, nativeCurrency.decimals); // PAS, 10 decimals
+    const amountWei = parseUnits(params.amount, nativeCurrency.decimals); // SUM, 10 decimals
     return lockTradeViaSubstrate(
       wallet.address, wallet.signer,
       params.counterparty, params.offerId, params.agent /* ZERO_ADDRESS for direct */, amountWei,
@@ -329,7 +329,7 @@ export class ChainError extends Error {
 export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   RPC_UNAVAILABLE: 'Unable to connect to Polkadot. Check your internet connection.',
   TX_REVERTED: 'Transaction failed. Your funds are safe.',
-  INSUFFICIENT_FUNDS: 'Insufficient PAS balance for gas/escrow.',
+  INSUFFICIENT_FUNDS: 'Insufficient SUM balance for gas/escrow.',
   USER_REJECTED: 'Transaction cancelled.',
   TIMEOUT: 'Request timed out. Please try again.',
   INVALID_STATE: 'Trade is no longer in the expected state. Please refresh.',

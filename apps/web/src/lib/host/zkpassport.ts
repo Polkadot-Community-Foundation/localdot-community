@@ -81,7 +81,7 @@ async function submitRegistryCall(
   // native balance — PGAS does not sponsor it).
   await warnIfLowGasBalance(api, originAddress);
 
-  // Accounts are auto-mapped by pallet-revive's AutoMapper on Paseo Next v2,
+  // Accounts are auto-mapped by pallet-revive's AutoMapper on Summit,
   // so we no longer pre-flight `map_account`.
 
   const tx = api.tx.Revive.call({

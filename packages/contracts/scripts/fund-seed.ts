@@ -1,7 +1,7 @@
 /**
  * Top up the four seed accounts (AGENT1/2, PROVIDER1/2) from the deployer.
  *
- * Required when the seed signers run out of PAS to pay gas (e.g. fresh wallets
+ * Required when the seed signers run out of SUM to pay gas (e.g. fresh wallets
  * or after a redeploy moved them onto a new chain).
  *
  * Usage: `pnpm --filter @localdot/contracts run fund-seed`
@@ -11,7 +11,7 @@ import { ethers } from 'hardhat';
 interface FundingTarget {
   label: string;
   address: string;
-  amount: string; // human-readable PAS
+  amount: string; // human-readable SUM
 }
 
 async function main() {
@@ -33,7 +33,7 @@ async function main() {
   const prov1 = new ethers.Wallet(provider1Key, provider);
   const prov2 = new ethers.Wallet(provider2Key, provider);
 
-  // Agents need stake + gas (seed stakes 800/700 PAS).
+  // Agents need stake + gas (seed stakes 800/700 SUM).
   // Providers only sign txs (no value), so a small gas float is enough.
   const targets: FundingTarget[] = [
     { label: 'Agent 1', address: agent1.address, amount: '810' },
@@ -45,7 +45,7 @@ async function main() {
   console.log(`Network: ${network.name} (chainId: ${network.chainId})`);
   console.log(`Deployer: ${deployer.address}`);
   const deployerBalance = await provider.getBalance(deployer.address);
-  console.log(`Deployer balance: ${ethers.formatEther(deployerBalance)} PAS\n`);
+  console.log(`Deployer balance: ${ethers.formatEther(deployerBalance)} SUM\n`);
 
   for (const target of targets) {
     const before = await provider.getBalance(target.address);
@@ -53,14 +53,14 @@ async function main() {
 
     if (before >= required) {
       console.log(
-        `✓ ${target.label} (${target.address}) already has ${ethers.formatEther(before)} PAS — skipping`,
+        `✓ ${target.label} (${target.address}) already has ${ethers.formatEther(before)} SUM — skipping`,
       );
       continue;
     }
 
     const topUp = required - before;
     console.log(
-      `→ Funding ${target.label} (${target.address}) with ${ethers.formatEther(topUp)} PAS …`,
+      `→ Funding ${target.label} (${target.address}) with ${ethers.formatEther(topUp)} SUM …`,
     );
     const tx = await deployer.sendTransaction({
       to: target.address,
@@ -68,7 +68,7 @@ async function main() {
     });
     await tx.wait();
     const after = await provider.getBalance(target.address);
-    console.log(`  ✅ tx ${tx.hash} — new balance ${ethers.formatEther(after)} PAS`);
+    console.log(`  ✅ tx ${tx.hash} — new balance ${ethers.formatEther(after)} SUM`);
   }
 
   console.log('\nAll seed accounts funded.');

@@ -98,7 +98,7 @@ async function fetchFromGateway(cid: string): Promise<Uint8Array> {
   const gateways = [
     ...(configuredGateway
       ? [`${configuredGateway.replace(/\/$/, "")}/${cid}`]
-      : [`https://paseo-bulletin-next-ipfs.polkadot.io/ipfs/${cid}`]),
+      : [`https://summit-ipfs.polkadot.io/ipfs/${cid}`]),
     `https://dweb.link/ipfs/${cid}`,
     `https://ipfs.io/ipfs/${cid}`,
   ];

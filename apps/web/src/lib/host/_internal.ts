@@ -3,17 +3,17 @@
  * Not part of the public API — consumers should import from `./index` instead.
  */
 
+import type { summitassethub } from "@polkadot-api/descriptors";
 import type { SizedHex, TypedApi } from "polkadot-api";
 import { Binary } from "polkadot-api";
 
-import type { paseohubnext } from "@polkadot-api/descriptors";
 import { env } from "../../env";
 import { ss58ToEvmAddress } from "../address";
 import { DEFAULT_CHAIN, MIN_GAS_BALANCE_NATIVE } from "../constants";
 
 /**
  * SS58 origin used as the caller for read-only `ReviveApi.call` dry-runs.
- * On Paseo Next v2 every SS58 is auto-mapped to its H160 by pallet-revive's
+ * On Summit every SS58 is auto-mapped to its H160 by pallet-revive's
  * AutoMapper, so any valid SS58 works; default to Alice. Override via
  * `VITE_READONLY_ORIGIN` if needed.
  */
@@ -36,7 +36,7 @@ export function addressToH160(address: string): SizedHex<20> {
 /**
  * Coerce any wallet identifier to the H160 form ethers' ABI encoder needs.
  * H160 inputs pass through; SS58 inputs are derived to H160 via the same
- * keccak/AutoMap rule pallet-revive uses on Paseo Next v2.
+ * keccak/AutoMap rule pallet-revive uses on Summit.
  */
 export function toEvmAddress(address: string): string {
   if (/^0x[0-9a-fA-F]{40}$/.test(address)) return address;
@@ -70,7 +70,7 @@ export class FunctionMissingError extends Error {
  * balance read is swallowed so a transient RPC blip can never block a submit.
  */
 export async function warnIfLowGasBalance(
-  api: TypedApi<typeof paseohubnext>,
+  api: TypedApi<typeof summitassethub>,
   originAddress: string,
 ): Promise<void> {
   try {

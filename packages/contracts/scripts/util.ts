@@ -8,7 +8,7 @@ import { ethers } from 'hardhat';
  *   Hardhat/ethers scripts go through the EVM RPC, so all values
  *   (both msg.value and ABI params) must use evmDecimals.
  *
- * nativeDecimals: native chain decimals (10 for PAS, 18 for ETH).
+ * nativeDecimals: native chain decimals (10 for SUM, 18 for ETH).
  *   Only relevant for Substrate-side interactions (Revive.call value param).
  */
 export async function getChainTokenInfo(): Promise<{
@@ -20,12 +20,12 @@ export async function getChainTokenInfo(): Promise<{
   const chainId = Number(network.chainId);
 
   if (chainId === 420420417) {
-    return { decimals: 18, nativeDecimals: 10, tokenName: 'PAS' };
+    return { decimals: 18, nativeDecimals: 10, tokenName: 'SUM' };
   } else if (chainId === 31337) {
     // Hardhat test network — only used by `hardhat test`
     return { decimals: 18, nativeDecimals: 18, tokenName: 'ETH' };
   } else {
-    throw new Error(`Unsupported chain ID ${chainId}. Supported: 420420417 (Paseo)`);
+    throw new Error(`Unsupported chain ID ${chainId}. Supported: 420420417 (Summit)`);
   }
 }
 
@@ -49,7 +49,7 @@ export function loadDeploymentFromEnv(): DeploymentInfo | null {
   if (!marketAddress?.trim()) return null;
   const chainIdStr = chainId ?? '420420417';
   return {
-    network: chainIdStr === '420420417' ? 'Paseo Asset Hub' : 'unknown',
+    network: chainIdStr === '420420417' ? 'Summit Asset Hub' : 'unknown',
     chainId: chainIdStr,
     market: { address: marketAddress },
   };

@@ -6,11 +6,11 @@
   "license": "GPL-3.0-only",
   "repository": {
     "type": "git",
-    "url": "https://github.com/paritytech/localdot-community.git"
+    "url": "https://github.com/Polkadot-Community-Foundation/localdot-community.git"
   },
-  "homepage": "https://github.com/paritytech/localdot-community#readme",
+  "homepage": "https://github.com/Polkadot-Community-Foundation/localdot-community#readme",
   "bugs": {
-    "url": "https://github.com/paritytech/localdot-community/issues"
+    "url": "https://github.com/Polkadot-Community-Foundation/localdot-community/issues"
   },
   "author": "Parity Technologies <admin@parity.io>",
   "scripts": {

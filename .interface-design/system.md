@@ -8,7 +8,7 @@
 
 ## Intent
 
-**Who:** Three roles. **Buyer** — someone in an emerging market with cash in hand, meeting a stranger to exchange for digital dollars (conceptually USD-priced; the escrowed asset is the native chain token, PAS on testnet). **Provider** — manages offers between other work. **Handoff Agent** — a physical shop that confirms cash on the buyer's behalf so the two principals never have to meet. Mobile-first, harsh sunlight, nervous energy.
+**Who:** Three roles. **Buyer** — someone in an emerging market with cash in hand, meeting a stranger to exchange for digital dollars (conceptually USD-priced; the escrowed asset is the native chain token, SUM on Summit). **Provider** — manages offers between other work. **Handoff Agent** — a physical shop that confirms cash on the buyer's behalf so the two principals never have to meet. Mobile-first, harsh sunlight, nervous energy.
 
 **What they do:**
 - **Direct path (two people meet):** Find provider → agree terms → lock escrow (LOCKED) → meet in person → both `confirmTrade` → escrow releases, COMPLETED → walk away safe.

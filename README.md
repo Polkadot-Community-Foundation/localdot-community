@@ -13,12 +13,12 @@ A Web3, peer-to-peer marketplace for swapping physical **cash** for **digital to
 - No "connect wallet" button — the app is a **Product** that runs inside a Polkadot **Host** (the desktop app or [dot.li](https://dot.li)), which lends it the signer.
 - Two ways to trade: **direct** (two people meet) or **agent-mediated** (a local shop confirms the cash handover).
 
-## Deployed Contracts (Paseo Next v2)
+## Deployed Contracts
 
-| Contract | Address |
-|----------|---------|
-| `P2PMarket` | `0x86a9F3fe05CA4Bba050CF271Ac64fDF0D893F09E` |
-| `ZKPassportRegistry` | `0xAA7C4b07c7040D31e40ad60E9e35257E376BD717` |
+Contract addresses are **per-deployment**: each instance deploys its own `P2PMarket`
+(and optionally `ZKPassportRegistry`) to **Summit Asset Hub** and wires the address
+into the build. `pnpm run deploy` fills these in for you (see below) — there is no
+shared, hardcoded address.
 
 ## Getting Started
 
@@ -45,25 +45,25 @@ pnpm dev               # dev server on http://localhost:5173
 Set the contract addresses in `apps/web/.env.local` — otherwise the app shows **"contract not deployed"**:
 
 ```bash
-VITE_P2PMARKET_ADDRESS=0x86a9F3fe05CA4Bba050CF271Ac64fDF0D893F09E
-VITE_ZKPASSPORT_REGISTRY_ADDRESS=0xAA7C4b07c7040D31e40ad60E9e35257E376BD717
+VITE_P2PMARKET_ADDRESS=0x…              # your deployed P2PMarket on Summit Asset Hub
+VITE_ZKPASSPORT_REGISTRY_ADDRESS=0x…    # optional
 ```
 
-Chain access is **host-routed**: the app reads Asset Hub / People / Bulletin *through* the Polkadot Host (`VITE_NETWORK` selects the chain set — see `apps/web/src/lib/host/networks.ts`), not a direct WSS. So open the dev URL **inside a Polkadot Host** (the desktop app or [dot.li](https://dot.li)) — that's where both the chain connections and the signer come from. A bare browser tab loads the UI but can't reach the chains.
+Chain access is **host-routed**: the app reads Asset Hub / People / Bulletin *through* the Polkadot Host (`VITE_NETWORK` selects the chain set, default `summit` — see `apps/web/src/lib/host/networks.ts`), not a direct WSS. So open the dev URL **inside a Polkadot Host** (the desktop app or [dot.li](https://dot.li)) — that's where both the chain connections and the signer come from. A bare browser tab loads the UI but can't reach the chains.
 
 ## Environment Variables
 
-`apps/web/.env.local` — everything except the contract addresses has a Paseo Next v2 default:
+`apps/web/.env.local` — everything except the contract addresses has a Summit default:
 
 | Variable | Description |
 |----------|-------------|
 | `VITE_P2PMARKET_ADDRESS` | P2PMarket contract address (required to load data) |
 | `VITE_ZKPASSPORT_REGISTRY_ADDRESS` | ZKPassportRegistry address (optional — identity verification) |
 | `VITE_CHAIN_ID` | EVM chain id (default `420420417`) |
-| `VITE_NETWORK` | Host-routed chain set — Asset Hub / People / Bulletin (default `paseo-next-v2`) |
-| `VITE_IPFS_GATEWAY` | Bulletin IPFS gateway |
+| `VITE_NETWORK` | Host-routed chain set — Asset Hub / People / Bulletin (default `summit`) |
+| `VITE_IPFS_GATEWAY` | Bulletin IPFS gateway (default `https://summit-ipfs.polkadot.io/ipfs/`) |
 
-`pnpm run deploy` fills in the contract address automatically; CI builds load these from [.github/env](.github/env). Full list with validation lives in [apps/web/src/env.ts](apps/web/src/env.ts).
+`pnpm run deploy` fills in the contract address automatically. Full list with validation lives in [apps/web/src/env.ts](apps/web/src/env.ts).
 
 ## Learn more
 

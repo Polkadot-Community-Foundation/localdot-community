@@ -3,12 +3,12 @@
 Reference implementation from the dot.li universal viewer. Use these patterns when building client-side Polkadot apps that need trustless chain access.
 
 > **How LocalDOT actually connects (not this):** LocalDOT does **not** use bundled
-> Smoldot light-client chain specs. It connects to the Paseo Next v2 chains over
+> Smoldot light-client chain specs. It connects to the Summit chains over
 > **WSS via PAPI descriptors** generated under `apps/web/.papi/descriptors/`
-> (`paseohubnext`, `bulletinnext`, `peoplenext`), using `getWsProvider` from
+> (`summitassethub`, `summitbulletin`, `summitpeople`), using `getWsProvider` from
 > `polkadot-api/ws`. See [`apps/web/src/lib/host/assethub-provider.ts`](../../../../apps/web/src/lib/host/assethub-provider.ts)
 > and [`apps/web/src/lib/statement-store.ts`](../../../../apps/web/src/lib/statement-store.ts).
-> The Paseo Next v2 chains are not bundled as well-known light-client specs in
+> The Summit chains are not bundled as well-known light-client specs in
 > `polkadot-api`, so the Smoldot patterns below are **upstream dot.li reference
 > only**, not how this app reaches the chain.
 
@@ -34,7 +34,7 @@ Reference implementation from the dot.li universal viewer. Use these patterns wh
 **Key packages from polkadot-api:**
 - `polkadot-api/smoldot/from-worker` - Worker initialization
 - `polkadot-api/smoldot/worker?worker` - Web Worker (Vite syntax)
-- `polkadot-api/chains/paseo` - Paseo relay chain spec
+- `polkadot-api/chains/summit` - Summit relay chain spec
 - `polkadot-api/chains/paseo_asset_hub` - Asset Hub chain spec
 - `polkadot-api/sm-provider` - Smoldot provider for polkadot-api
 
@@ -45,7 +45,7 @@ Reference implementation from the dot.li universal viewer. Use these patterns wh
 ```typescript
 import { startFromWorker } from "polkadot-api/smoldot/from-worker";
 import SmWorker from "polkadot-api/smoldot/worker?worker";
-import { chainSpec as paseoChainSpec } from "polkadot-api/chains/paseo";
+import { chainSpec as relayChainSpec } from "polkadot-api/chains/paseo";
 import { chainSpec as assetHubPaseoChainSpec } from "polkadot-api/chains/paseo_asset_hub";
 import { getSmProvider } from "polkadot-api/sm-provider";
 import { createClient, type PolkadotClient } from "polkadot-api";
@@ -54,7 +54,7 @@ let clientInstance: PolkadotClient | null = null;
 let apiInstance: ReturnType<PolkadotClient["getUnsafeApi"]> | null = null;
 
 /**
- * Initialize smoldot and connect to Asset Hub Paseo.
+ * Initialize smoldot and connect to Asset Hub Summit.
  * Returns when chain is synced and ready for queries.
  */
 async function ensureClient(
@@ -68,13 +68,13 @@ async function ensureClient(
   const smoldot = startFromWorker(new SmWorker());
 
   // Step 2: Add relay chain (required for parachain validation)
-  onStatus?.("Adding Paseo relay chain...");
+  onStatus?.("Adding Summit relay chain...");
   const relayChain = await smoldot.addChain({
-    chainSpec: paseoChainSpec
+    chainSpec: relayChainSpec
   });
 
   // Step 3: Add parachain with relay chain reference
-  onStatus?.("Adding Asset Hub Paseo...");
+  onStatus?.("Adding Asset Hub Summit...");
   const chain = smoldot.addChain({
     chainSpec: assetHubPaseoChainSpec,
     potentialRelayChains: [relayChain],
@@ -85,12 +85,12 @@ async function ensureClient(
   clientInstance = createClient(provider);
 
   // Step 5: Wait for chain sync (CRITICAL - don't skip)
-  onStatus?.("Syncing with Asset Hub Paseo...");
+  onStatus?.("Syncing with Asset Hub Summit...");
   await clientInstance.getFinalizedBlock();
 
   // Step 6: Get API instance for queries
   apiInstance = clientInstance.getUnsafeApi();
-  onStatus?.("Connected to Asset Hub Paseo");
+  onStatus?.("Connected to Asset Hub Summit");
 
   return apiInstance;
 }
@@ -289,14 +289,14 @@ Available chain specs from polkadot-api:
 |-------|-------------|
 | Polkadot | `polkadot-api/chains/polkadot` |
 | Polkadot Asset Hub | `polkadot-api/chains/polkadot_asset_hub` |
-| Paseo | `polkadot-api/chains/paseo` |
-| Paseo Asset Hub | `polkadot-api/chains/paseo_asset_hub` |
+| Summit | `polkadot-api/chains/summit` |
+| Summit Asset Hub | `polkadot-api/chains/paseo_asset_hub` |
 | Westend | `polkadot-api/chains/westend2` |
 
-> **LocalDOT note:** the Paseo Next v2 chains LocalDOT targets (Asset Hub Next,
-> Bulletin Next, People Next System) are **not** in this list — there are no bundled
+> **LocalDOT note:** the Summit chains LocalDOT targets (Summit Asset Hub,
+> Summit Bulletin, Summit People) are **not** in this list — there are no bundled
 > light-client specs for them. LocalDOT connects to them over WSS using generated
-> PAPI descriptors instead (`paseohubnext` / `bulletinnext` / `peoplenext`).
+> PAPI descriptors instead (`summitassethub` / `summitbulletin` / `summitpeople`).
 
 ---
 

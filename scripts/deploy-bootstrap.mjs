@@ -8,7 +8,7 @@
  * missing, then hands off to the real (tsx-powered) interactive deploy.
  *
  * The mnemonic is never touched here — it's only ever entered inside deploy.ts
- * and passed in-memory to bulletin-deploy. Nothing secret is written to disk.
+ * and passed in-memory to polkadot-app-deploy. Nothing secret is written to disk.
  */
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";

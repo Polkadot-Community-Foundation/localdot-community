@@ -19,16 +19,21 @@ export interface ChainConfig {
 
 /** Supported blockchain networks. Add new entries here on migration. */
 export const SUPPORTED_CHAINS = {
-  PASEO_NEXT: {
+  SUMMIT: {
     chainId: 420420417,
-    name: "Paseo Asset Hub Next",
-    rpcUrl: "https://eth-rpc-paseo-next.polkadot.io",
-    explorer: "https://blockscout-paseo-next.polkadot.io",
-    nativeCurrency: { name: "Paseo", symbol: "PAS", decimals: 10 },
+    name: "Summit Asset Hub",
+    // Summit has no hosted public eth-rpc endpoint. This field is stored for the
+    // app's display/wrong-network badge only — contract I/O is host-routed over
+    // WSS (see lib/host/networks.ts), never this URL. Run a local revive eth-rpc
+    // adapter (→ wss://summit-asset-hub-rpc.polkadot.io) only if you need EVM JSON-RPC.
+    rpcUrl: "",
+    // Summit has no public block explorer yet; leave empty (explorer links hide).
+    explorer: "",
+    nativeCurrency: { name: "Summit", symbol: "SUM", decimals: 10 },
   },
 } as const satisfies Record<string, ChainConfig>;
 
-export const DEFAULT_CHAIN = SUPPORTED_CHAINS.PASEO_NEXT;
+export const DEFAULT_CHAIN = SUPPORTED_CHAINS.SUMMIT;
 
 export type SupportedChainId =
   (typeof SUPPORTED_CHAINS)[keyof typeof SUPPORTED_CHAINS]["chainId"];

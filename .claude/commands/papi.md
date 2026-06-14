@@ -1,12 +1,12 @@
 # /papi - PAPI Chain Integration
 
-Set up Polkadot-API (PAPI) over WSS for Substrate chain interactions on Paseo Next v2.
+Set up Polkadot-API (PAPI) over WSS for Substrate chain interactions on Summit.
 
 **Important — how THIS repo actually works:**
-- PAPI talks to three Paseo Next v2 chains over **WSS**, using descriptors generated
-  against those WSS endpoints: `paseohubnext` (Asset Hub Next), `bulletinnext`
-  (Bulletin Next), and `peoplenext` (People Next System). These are **not** the
-  well-known `paseo` / `paseoAssetHub` / `paseoPeople` chains, and they are **not**
+- PAPI talks to three Summit chains over **WSS**, using descriptors generated
+  against those WSS endpoints: `summitassethub` (Summit Asset Hub), `summitbulletin`
+  (Summit Bulletin), and `summitpeople` (Summit People). These are **not** the
+  well-known `summit` / `summitAssetHub` / `summitPeople` chains, and they are **not**
   bundled as Smoldot light-client specs — none of the Next v2 chains ship as light-client
   specs in `polkadot-api` yet.
 - Connection uses `getWsProvider` (from `polkadot-api/ws`) + `createClient`. There is
@@ -32,10 +32,10 @@ Run these from the `apps/web` directory:
 # Install polkadot-api
 pnpm add polkadot-api
 
-# Add the three Paseo Next v2 chains by WSS endpoint
-npx papi add paseohubnext -w wss://paseo-asset-hub-next-rpc.polkadot.io     # Asset Hub Next (contracts)
-npx papi add bulletinnext -w wss://paseo-bulletin-next-rpc.polkadot.io      # Bulletin Next (storage)
-npx papi add peoplenext   -w wss://paseo-people-next-system-rpc.polkadot.io # People Next (Statement Store RPC)
+# Add the three Summit chains by WSS endpoint
+npx papi add summitassethub -w wss://summit-asset-hub-rpc.polkadot.io     # Summit Asset Hub (contracts)
+npx papi add summitbulletin -w wss://summit-bulletin-rpc.polkadot.io      # Summit Bulletin (storage)
+npx papi add summitpeople   -w wss://summit-people-rpc.polkadot.io # Summit People (Statement Store RPC)
 
 # Generate all type descriptors
 npx papi
@@ -65,7 +65,7 @@ import { createPapiProvider } from "@novasamatech/host-api-wrapper";
 import type { PolkadotClient, TypedApi } from "polkadot-api";
 import { createClient } from "polkadot-api";
 
-import { paseohubnext } from "@polkadot-api/descriptors";
+import { summitassethub } from "@polkadot-api/descriptors";
 import { activeNetwork } from "./networks";
 
 // Host-routed: the host owns the transport; we just name the chain by genesis.
@@ -73,23 +73,23 @@ const provider = createPapiProvider(activeNetwork.assetHubGenesis);
 const client: PolkadotClient = createClient(provider);
 
 // Typed API — autocomplete for pallets, storage, tx, runtime APIs, constants
-const api: TypedApi<typeof paseohubnext> = client.getTypedApi(paseohubnext);
+const api: TypedApi<typeof summitassethub> = client.getTypedApi(summitassethub);
 
 // e.g. read a Revive runtime constant
 const nativeToEthRatio = await api.constants.Revive.NativeToEthRatio();
 ```
 
 The provider is a lazily-initialized singleton (cached client + typed API, HMR-safe).
-People Next is reached separately for the Statement Store — see
+Summit People is reached separately for the Statement Store — see
 [`apps/web/src/lib/statement-store.ts`](../../apps/web/src/lib/statement-store.ts), which
-subscribes via `@novasamatech/sdk-statement` over a host-routed People Next
+subscribes via `@novasamatech/sdk-statement` over a host-routed Summit People
 connection (`createPapiProvider(activeNetwork.peopleGenesis)`).
 
 ---
 
 ## Smart Contracts Through PAPI (not ethers transport)
 
-P2PMarket runs on PolkaVM behind pallet-revive on Asset Hub Next. All contract traffic
+P2PMarket runs on PolkaVM behind pallet-revive on Summit Asset Hub. All contract traffic
 goes through the same PAPI client above — ethers only encodes/decodes the ABI.
 
 **Reads** dry-run via `ReviveApi.call` (origin = any SS58, defaults to
@@ -111,13 +111,13 @@ const decoded = iface.decodeFunctionResult(functionName, Binary.toHex(result.res
 ```
 
 **Writes** use the `Revive.call` extrinsic, signed by the host-injected signer.
-Native value (PAS) rides along via the `value` field — escrow uses the chain native token,
+Native value (SUM) rides along via the `value` field — escrow uses the chain native token,
 not an ERC-20:
 
 ```typescript
 const tx = api.tx.Revive.call({
   dest: addressToH160(contractAddress),
-  value,                              // native PAS (lockTrade is payable)
+  value,                              // native SUM (lockTrade is payable)
   weight_limit: { ref_time, proof_size },
   storage_deposit_limit,
   data: Binary.fromHex(calldata),
@@ -125,13 +125,13 @@ const tx = api.tx.Revive.call({
 await tx.signAndSubmit(signer, { mortality: { mortal: true, period: 2048 } });
 ```
 
-Accounts are auto-mapped by pallet-revive's `AutoMapper` on Paseo Next v2, so we do **not**
+Accounts are auto-mapped by pallet-revive's `AutoMapper` on Summit, so we do **not**
 call `Revive.map_account`. Full implementation:
 [`apps/web/src/lib/host/_p2p-market-call.ts`](../../apps/web/src/lib/host/_p2p-market-call.ts).
 
 > Gas note: `SmartContractAllowance` only auto-signs `Revive.call` writes (skips the
 > per-call modal) — it is **not** gas sponsorship. PGAS sponsorship is not wired, so the
-> product account must hold native PAS (faucet on testnet) for any write.
+> product account must hold native SUM (faucet on testnet) for any write.
 
 ---
 
@@ -158,7 +158,7 @@ const sub = preimageManager.lookup(cidToPreimageKey(cid), (preimage) => {
 });
 ```
 
-The `bulletinnext` descriptor still exists as a codegen target in
+The `summitbulletin` descriptor still exists as a codegen target in
 `.papi/polkadot-api.json`, but the app no longer builds a WSS client for Bulletin —
 that was removed when chain connections moved to the host. (The contracts **seed**
 script still reaches Bulletin directly over WSS via `VITE_BULLETIN_ENDPOINT`, since
@@ -168,7 +168,7 @@ it's a Node tool with no host.)
 
 ## Chain Reference
 
-At runtime the app connects to these Paseo Next v2 chains **via the host**
+At runtime the app connects to these Summit chains **via the host**
 (`createPapiProvider` keyed by genesis hash — no WSS, no bundled light-client
 specs). The active network is chosen at build time via `VITE_NETWORK`, and the
 genesis hashes live in `src/lib/host/networks.ts`. The WSS endpoints below are
@@ -177,14 +177,14 @@ live in `.papi/polkadot-api.json`) — there are no runtime endpoint env overrid
 
 | Descriptor | Chain | Codegen WSS (`papi update`) |
 |------------|-------|------------------------------|
-| `paseohubnext` | Asset Hub Next (contracts) | `wss://paseo-asset-hub-next-rpc.polkadot.io` |
-| `bulletinnext` | Bulletin Next (storage) | `wss://paseo-bulletin-next-rpc.polkadot.io` |
-| `peoplenext` | People Next System (Statement Store) | `wss://paseo-people-next-system-rpc.polkadot.io` |
+| `summitassethub` | Summit Asset Hub (contracts) | `wss://summit-asset-hub-rpc.polkadot.io` |
+| `summitbulletin` | Summit Bulletin (storage) | `wss://summit-bulletin-rpc.polkadot.io` |
+| `summitpeople` | Summit People (Statement Store) | `wss://summit-people-rpc.polkadot.io` |
 
 EVM-side metadata for the same Asset Hub: chainId `420420417`, eth-rpc
-`https://eth-rpc-paseo-next.polkadot.io`, explorer `https://blockscout-paseo-next.polkadot.io`.
-Native token PAS (10 decimals). IPFS gateway default
-`https://paseo-bulletin-next-ipfs.polkadot.io/ipfs/`.
+`http://localhost:8545`, explorer `<no Summit explorer yet>`.
+Native token SUM (10 decimals). IPFS gateway default
+`https://summit-ipfs.polkadot.io/ipfs/`.
 
 Reference: https://papi.how/getting-started and https://papi.how/codegen/
 
@@ -202,15 +202,15 @@ Reference: https://papi.how/getting-started and https://papi.how/codegen/
   endpoint and ethers `JsonRpcProvider` are used by the Hardhat deploy tooling, not the
   app runtime.)
 - **No Smoldot, no WebWorker.** Connections are plain WSS via `getWsProvider`
-  (`polkadot-api/ws`) + `createClient`. None of the Paseo Next v2 chains ship as
+  (`polkadot-api/ws`) + `createClient`. None of the Summit chains ship as
   light-client specs in `polkadot-api` yet, so there is no `?worker`/`startFromWorker`
   path to maintain.
 - **`Binary` is a function namespace** in papi v2 — use `Binary.fromHex` / `Binary.toHex`,
   never `new Binary(...)`.
-- **AutoMapper handles SS58 ↔ H160** on Asset Hub Next; the product does not call
+- **AutoMapper handles SS58 ↔ H160** on Summit Asset Hub; the product does not call
   `Revive.map_account`.
 
-> The contract is **P2PMarket** (escrowing the chain native token PAS via `msg.value`),
+> The contract is **P2PMarket** (escrowing the chain native token SUM via `msg.value`),
 > not an `LocalDOTEscrow` ERC-20 escrow — see `/contracts`. Identity verification is
 > **ZKPassport on Asset Hub** (off-chain ZK proof + on-chain `ZKPassportRegistry`), not a
 > People-chain proof-of-personhood check.
@@ -221,7 +221,7 @@ Reference: https://papi.how/getting-started and https://papi.how/codegen/
 
 - [ ] Add the three descriptors by WSS (`papi add ... -w`); confirm they regenerate on build
 - [ ] Wire the Asset Hub WSS provider (`assethub-provider.ts`)
-- [ ] Wire the Bulletin Next WSS provider (`bulletin-provider.ts`) + `packages/bulletin`
+- [ ] Wire the Summit Bulletin WSS provider (`bulletin-provider.ts`) + `packages/bulletin`
 - [ ] Connect Explore offer lists to on-chain data via `ReviveApi.call`
 - [ ] Integrate P2PMarket contract — createOffer, lockTrade, confirm*, refundTrade
 - [ ] Wire trade pages to `Revive.call` writes (host-injected signer)
@@ -231,9 +231,9 @@ Reference: https://papi.how/getting-started and https://papi.how/codegen/
 ## Phase 3 Acceptance Criteria
 
 - [ ] All quality gates pass (`turbo build && turbo test && turbo lint && turbo typecheck`)
-- [ ] Can publish/read offers against Bulletin Next + Asset Hub Next (testnet)
+- [ ] Can publish/read offers against Summit Bulletin + Summit Asset Hub (testnet)
 - [ ] Explore shows offers read from chain
-- [ ] Can create an offer and lock a trade via the contract (native PAS value)
+- [ ] Can create an offer and lock a trade via the contract (native SUM value)
 - [ ] Can confirm a trade / refund after timeout via the contract
 - [ ] Transaction states display correctly
 - [ ] Error states handled gracefully (WSS failure, dispatch error)

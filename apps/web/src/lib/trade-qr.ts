@@ -219,7 +219,7 @@ export async function signTradeQR(
   // auto-detects the wrap.
   //
   // Race against a 75s timeout. The host (polkadot-desktop) routes legacy
-  // sign requests through Bulletin Paseo to Polkadot Vault on the user's
+  // sign requests through the Bulletin chain to Polkadot Vault on the user's
   // phone; if Vault isn't open, the phone is offline, or the chain follow
   // is stalled, the host's own 60s timeout fires SigningErr — but the
   // host's signingPool is poolSize:1, so a stuck request wedges any

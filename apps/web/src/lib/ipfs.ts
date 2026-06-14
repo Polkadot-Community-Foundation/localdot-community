@@ -9,11 +9,10 @@ import { fetchFromHostStorage, fetchJsonFromHostStorage } from "./host/storage";
  * Use fetchFromIPFS() or fetchJSONFromIPFS() instead.
  */
 /**
- * Default IPFS gateway for the Paseo Next v2 stack. Override via
+ * Default IPFS gateway for the Summit Bulletin stack. Override via
  * `VITE_IPFS_GATEWAY` for local dev or alternative gateways.
  */
-const DEFAULT_IPFS_GATEWAY =
-  "https://paseo-bulletin-next-ipfs.polkadot.io/ipfs/";
+const DEFAULT_IPFS_GATEWAY = "https://summit-ipfs.polkadot.io/ipfs/";
 
 export function getIPFSUrl(cid: string): string {
   const gateway = env.VITE_IPFS_GATEWAY || DEFAULT_IPFS_GATEWAY;

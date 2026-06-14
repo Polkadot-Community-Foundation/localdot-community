@@ -564,7 +564,7 @@ export function createMockQRPayload(
   return {
     header: {
       version: 1,
-      chainId: 420420417, // Paseo Asset Hub
+      chainId: 420420417, // Summit Asset Hub
       palletVersion: 1,
       hasAgent,
       tradeId: overrides?.tradeId ?? randomBytes(32),

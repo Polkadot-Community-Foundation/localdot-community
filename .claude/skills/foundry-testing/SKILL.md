@@ -200,14 +200,14 @@ function testFuzz_Transfer(uint256 amount) public {
 ## Fork Testing
 
 > Generic Foundry reference only — this repo does not fork-test. Its Hardhat
-> networks are `hardhat` (local, chainId 31337) and `paseo` (AH Next,
-> chainId 420420417, `https://eth-rpc-paseo-next.polkadot.io`).
+> networks are `hardhat` (local, chainId 31337) and `summit` (AH Next,
+> chainId 420420417, `http://localhost:8545`).
 
 ```solidity
-function test_WithPaseoFork() public {
-    vm.createSelectFork("paseo");
+function test_WithSummitFork() public {
+    vm.createSelectFork("summit");
 
-    // Test against real Paseo state
+    // Test against real Summit state
     MyContract live = MyContract(DEPLOYED_ADDRESS);
     assertTrue(live.isActive());
 }

@@ -25,7 +25,7 @@ quality gates, see [CLAUDE.md](../CLAUDE.md).
 
 ## Configuration
 
-The network endpoints default to the **Paseo Next v2** test network, but the app needs a **deployed contract address** to load any data (without it you'll see "contract not deployed"). Create `apps/web/.env.local` with your `VITE_P2PMARKET_ADDRESS` / `VITE_ZKPASSPORT_REGISTRY_ADDRESS`, or deploy your own (see [Deploying](#deploying)) and the script fills them in:
+The network endpoints default to the **Summit** network, but the app needs a **deployed contract address** to load any data (without it you'll see "contract not deployed"). Create `apps/web/.env.local` with your `VITE_P2PMARKET_ADDRESS` / `VITE_ZKPASSPORT_REGISTRY_ADDRESS`, or deploy your own (see [Deploying](#deploying)) and the script fills them in:
 
 ```bash
 # The two smart contracts (filled in automatically by the deploy script).
@@ -33,13 +33,13 @@ The network endpoints default to the **Paseo Next v2** test network, but the app
 VITE_P2PMARKET_ADDRESS=0x...
 VITE_ZKPASSPORT_REGISTRY_ADDRESS=0x...
 
-# Network — these all default to Paseo Next v2 public endpoints if omitted:
+# Network — these all default to Summit public endpoints if omitted:
 VITE_CHAIN_ID=420420417
-VITE_RPC_URL=https://eth-rpc-paseo-next.polkadot.io
-VITE_ASSET_HUB_ENDPOINT=wss://paseo-asset-hub-next-rpc.polkadot.io
-VITE_BULLETIN_ENDPOINT=wss://paseo-bulletin-next-rpc.polkadot.io
-VITE_PEOPLE_CHAIN_ENDPOINT=wss://paseo-people-next-system-rpc.polkadot.io
-VITE_IPFS_GATEWAY=https://paseo-bulletin-next-ipfs.polkadot.io/ipfs/
+VITE_RPC_URL=                                        # display only; Summit has no hosted eth-rpc
+VITE_ASSET_HUB_ENDPOINT=wss://summit-asset-hub-rpc.polkadot.io
+VITE_BULLETIN_ENDPOINT=wss://summit-bulletin-rpc.polkadot.io
+VITE_PEOPLE_CHAIN_ENDPOINT=wss://summit-people-rpc.polkadot.io
+VITE_IPFS_GATEWAY=https://summit-ipfs.polkadot.io/ipfs/
 
 # Optional knobs:
 VITE_USE_HOST_API=false          # force standalone mode (skip the Polkadot Host)
@@ -48,7 +48,7 @@ VITE_ZKPASSPORT_DOMAIN=demo.zkpassport.id
 
 The single source of truth for the default network lives in [apps/web/src/lib/constants.ts](../apps/web/src/lib/constants.ts), and the full list of environment variables (with validation) is in [apps/web/src/env.ts](../apps/web/src/env.ts).
 
-> **About money & gas:** on the test network the on-chain token is **PAS** (Paseo's native test token), and you need a small amount of it (~0.1 PAS) in your account to pay transaction fees before you can create offers or lock funds. Gas is **not** sponsored for you yet — see [What's built vs. what's coming](#whats-built-vs-whats-coming).
+> **About money & gas:** on Summit the on-chain token is **SUM** (Summit's native token), and you need a small amount of it (~0.1 SUM) in your account to pay transaction fees before you can create offers or lock funds. Gas is **not** sponsored for you yet — see [What's built vs. what's coming](#whats-built-vs-whats-coming).
 
 ## Useful commands
 
@@ -84,18 +84,18 @@ pnpm run deploy
 It walks you through:
 
 1. **Wallet** — generate a fresh 12-word mnemonic, or paste an existing 12/24-word one.
-2. **Funding** — it prints the address and a faucet link, then waits until the on-chain balance clears a floor (≥20 PAS — enough for the contract deploy and the `.dot` registration) before spending.
-3. **Contract** — compiles `P2PMarket` (fetches the `resolc` PolkaVM compiler on first run) and deploys it to Asset Hub Next via PAPI / pallet-revive.
+2. **Funding** — it prints the address (Summit has no public faucet — fund it from a Summit source account), then waits until the on-chain balance clears a floor (≥20 SUM — enough for the contract deploy and the `.dot` registration) before spending.
+3. **Contract** — compiles `P2PMarket` (fetches the `resolc` PolkaVM compiler on first run) and deploys it to Summit Asset Hub via PAPI / pallet-revive.
 4. **Build** — builds the web app with Vite to `apps/web/dist`.
-5. **Publish** — publishes the build to a `.dot` domain via `bulletin-deploy`, so it's served decentrally from the Bulletin Chain with no web host.
+5. **Publish** — publishes the build to a `.dot` domain via `polkadot-app-deploy`, so it's served decentrally from the Bulletin Chain with no web host.
 
-The same mnemonic signs the contract instantiate **and** is handed to `bulletin-deploy` (via the `MNEMONIC` env var) for the publish. It only ever lives in memory — **never written to disk**. The deployed contract address + chain are written to `apps/web/.env.local` (gitignored, so the static build inlines them).
+The same mnemonic signs the contract instantiate **and** is handed to `polkadot-app-deploy` (via the `MNEMONIC` env var) for the publish. It only ever lives in memory — **never written to disk**. The deployed contract address + chain are written to `apps/web/.env.local` (gitignored, so the static build inlines them).
 
 ### Prerequisites
 
 - **Node 22+ and pnpm** (already required for the repo).
-- **IPFS (kubo)** is optional — if it isn't on your `PATH`, the deploy falls back to bulletin-deploy's pure-JS merkleizer (`--js-merkle`). Installing kubo just speeds up large publishes.
-- Everything else is automatic: if a recent `bulletin-deploy` isn't already on your machine, the deploy installs the latest globally (`npm i -g bulletin-deploy@latest`), falling back to a throwaway `npx` fetch only if the global install isn't possible. The `resolc` contract compiler (~170 MB) is downloaded on first run.
+- **IPFS (kubo)** is optional — if it isn't on your `PATH`, the deploy falls back to polkadot-app-deploy's pure-JS merkleizer (`--js-merkle`). Installing kubo just speeds up large publishes.
+- Everything else is automatic: if a recent `polkadot-app-deploy` isn't already on your machine, the deploy installs the pinned version globally (`npm i -g @polkadot-community-foundation/polkadot-app-deploy@0.10.1`), falling back to a throwaway `npx` fetch only if the global install isn't possible. The `resolc` contract compiler (~170 MB) is downloaded on first run.
 
 ### What it writes
 
@@ -105,9 +105,9 @@ The same mnemonic signs the contract instantiate **and** is handed to `bulletin-
 
 ### Notes
 
-- **Domain** defaults to `localdot.dot` (the production label). Change it at the prompt to publish your own instance. (The deploy signer has PoP set, so DotNS accepts clean labels; without PoP, dev signers must use a ≥9-alphanumeric + 2-trailing-digits label.)
-- Asset Hub Next's **AutoMapper** creates the SS58 ↔ H160 mapping on first use, so the deploy does **not** call `Revive.map_account`.
-- `ZKPassportRegistry` is **not** part of this flow — deploy it separately with `pnpm --filter @localdot/contracts exec hardhat run scripts/deploy-zkpassport.ts --network paseo`.
+- **Domain** defaults to `localmarket.dot` (the production label). Change it at the prompt to publish your own instance. (The deploy signer has PoP set, so DotNS accepts clean labels; without PoP, dev signers must use a ≥9-alphanumeric + 2-trailing-digits label.)
+- Summit Asset Hub's **AutoMapper** creates the SS58 ↔ H160 mapping on first use, so the deploy does **not** call `Revive.map_account`.
+- `ZKPassportRegistry` is **not** part of this flow — deploy it separately with `pnpm --filter @localdot/contracts exec hardhat run scripts/deploy-zkpassport.ts --network summit`.
 
 ### Lower-level / manual deploys
 
@@ -118,7 +118,7 @@ The individual steps still work standalone:
 | `pnpm contracts:deploy` | Deploy `P2PMarket` via Hardhat/ethers (uses `PRIVATE_KEY` in `packages/contracts/.env`). |
 | `pnpm contracts:seed` | Populate a deployment with demo agents + offers. |
 | `pnpm --filter @localdot/web build` | Build the static frontend to `apps/web/dist`. |
-| `bulletin-deploy --env paseo-next-v2 ./apps/web/dist <domain>.dot` | Publish a built frontend (needs `MNEMONIC`). |
+| `polkadot-app-deploy --env summit ./apps/web/dist <domain>.dot` | Publish a built frontend (needs `MNEMONIC`). |
 
 See the deployment skills in [.claude/skills/](../.claude/skills/) for more detail.
 
@@ -165,7 +165,7 @@ An agent turns *"meet a stranger with a bag of cash"* into *"go to a known shop 
 
 | Word | What it means here |
 |------|--------------------|
-| **Digital token** | A token meant to be worth about \$1. It's the "digital cash" you swap for. *(Note: on the current test network the app actually moves Polkadot's native test token, PAS, priced at \$1 — integrating a real stablecoin is on the roadmap.)* |
+| **Digital token** | A token meant to be worth about \$1. It's the "digital cash" you swap for. *(Note: on Summit the app actually moves the chain-native token, SUM, priced at \$1 — integrating a real stablecoin is on the roadmap.)* |
 | **Escrow** | The automated middleman. The smart contract locks the seller's tokens and only releases them when the right people confirm the swap — or refunds them if the deal stalls. |
 | **Asset Hub** | The Polkadot chain that runs LocalDOT's smart contracts — the ledger where offers, agents, and the locked money live. |
 | **Bulletin Chain** | A short-term storage chain for bigger data: listing details, locations, profile photos, handover videos. Data here is meant to expire automatically so nothing piles up forever. |
@@ -173,7 +173,7 @@ An agent turns *"meet a stranger with a bag of cash"* into *"go to a known shop 
 | **Polkadot Host / Triangle / Product** | LocalDOT is a **Product** — a mini-app that runs *inside* a **Host** (the Polkadot wallet app, e.g. the Polkadot desktop app or dot.li). The Host lends the app its wallet, so you never paste a private key or "connect" an extension. |
 | **Contextual alias** | A privacy feature: you show up under a per-context nickname rather than broadcasting your real wallet address everywhere. |
 | **ZKPassport** | An optional way to prove *"I'm a unique, real, adult human"* using a zero-knowledge proof of your passport — **without revealing who you are**. Earns you a "Verified" badge. |
-| **Native token / PAS** | The blockchain's built-in currency. On the test network it's PAS; it's what's actually locked in escrow and what pays transaction fees. |
+| **Native token / SUM** | The blockchain's built-in currency. On Summit it's SUM; it's what's actually locked in escrow and what pays transaction fees. |
 
 ## The app, tab by tab
 
@@ -279,9 +279,9 @@ LocalDOT is a **single-page React app with no backend of its own**. Everything i
 - **`P2PMarket.sol`** — the heart of the system: the agent registry, the offer book, and the escrow. Escrow holds the chain's **native token** (not an ERC-20). Trades move through five states: `LOCKED → RELEASED → COMPLETED`, with `REFUNDED` (timeout) and `CANCELLED` (mutual) as exits. Reentrancy is guarded with a custom modifier; access control is per-function sender checks (there is no admin/owner).
 - **`ZKPassportRegistry.sol`** — records one proof-of-personhood attestation per wallet (just a hash + optional country code), and enforces one-passport-per-wallet. It does **not** verify the zero-knowledge proof on-chain — that happens off-chain in the client.
 
-**Why no "connect wallet" button?** The app is sandboxed inside the Polkadot Host, which holds the keys and signs on the app's behalf. This is deliberate (it's the Polkadot "Triangle" Product model) — it's also why signing only works inside a Host. The detailed reasoning (and why the legacy `signPayload`/pjs-signer path was abandoned on Asset Hub Next) is documented in [apps/web/src/lib/host/signer.ts](../apps/web/src/lib/host/signer.ts).
+**Why no "connect wallet" button?** The app is sandboxed inside the Polkadot Host, which holds the keys and signs on the app's behalf. This is deliberate (it's the Polkadot "Triangle" Product model) — it's also why signing only works inside a Host. The detailed reasoning (and why the legacy `signPayload`/pjs-signer path was abandoned on Summit Asset Hub) is documented in [apps/web/src/lib/host/signer.ts](../apps/web/src/lib/host/signer.ts).
 
-The networks targeted are the **Paseo Next v2** stack: **Asset Hub Next** (contracts), **Bulletin Next** (storage), and **People Next** (messaging). They're reached over WSS via generated PAPI descriptors (`paseohubnext`, `bulletinnext`, `peoplenext`) — not bundled light-client specs.
+The networks targeted are the **Summit** stack: **Summit Asset Hub** (contracts), **Summit Bulletin** (storage), and **Summit People** (messaging). They're reached over WSS via generated PAPI descriptors (`summitassethub`, `summitbulletin`, `summitpeople`) — not bundled light-client specs.
 
 For the full development guide, architecture rules, and quality gates, see [CLAUDE.md](../CLAUDE.md).
 
@@ -328,7 +328,7 @@ LocalDOT is a working V1, but parts of the long-term vision are still ahead. In 
 - ✅ Encrypted profile photos.
 
 **On the roadmap (designed, not yet enforced on-chain)**
-- ⏳ **A real stablecoin.** Today the escrow moves the native test token (PAS), priced \$1; integrating an actual stablecoin (or other token) is future work.
+- ⏳ **A real stablecoin.** Today the escrow moves the chain-native token (SUM), priced \$1; integrating an actual stablecoin (or other token) is future work.
 - ⏳ **Agent slashing.** The insurance deposit is visible and frozen during trades, but the contract can't yet *pay it out* to a wronged provider (the `DEFAULTED` state / slashing path isn't implemented). For now the stake is a trust signal, not enforced collateral.
 - ⏳ **Reputation** and **dispute resolution** — none on-chain yet; safety is escrow + timeout + mutual cancel.
 - ⏳ **Multi-asset / multi-currency** — USD and a single token only for now.

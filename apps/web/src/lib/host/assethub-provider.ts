@@ -1,7 +1,7 @@
 /**
  * Asset Hub Provider
  *
- * PAPI connection to Paseo Asset Hub for contract interactions, routed entirely
+ * PAPI connection to Summit Asset Hub for contract interactions, routed entirely
  * through the Polkadot host's chain-connection manager via `createPapiProvider`
  * (keyed by genesis hash). The host owns the transport, so the PApp opens no
  * socket of its own — meaning this only works inside a host environment
@@ -9,24 +9,24 @@
  */
 
 import { createPapiProvider } from "@novasamatech/host-api-wrapper";
+import { summitassethub } from "@polkadot-api/descriptors";
 import type { PolkadotClient, TypedApi } from "polkadot-api";
 import { createClient } from "polkadot-api";
 
-import { paseohubnext } from "@polkadot-api/descriptors";
 import { activeNetwork } from "./networks";
 
 class AssetHubProviderManager {
   private client: PolkadotClient | null = null;
-  private api: TypedApi<typeof paseohubnext> | null = null;
+  private api: TypedApi<typeof summitassethub> | null = null;
   private _nativeToEvmRatio: bigint | null = null;
   private initPromise: Promise<{
     client: PolkadotClient;
-    api: TypedApi<typeof paseohubnext>;
+    api: TypedApi<typeof summitassethub>;
   }> | null = null;
 
   async get(): Promise<{
     client: PolkadotClient;
-    api: TypedApi<typeof paseohubnext>;
+    api: TypedApi<typeof summitassethub>;
   }> {
     if (this.client && this.api) {
       return { client: this.client, api: this.api };
@@ -39,11 +39,11 @@ class AssetHubProviderManager {
     this.initPromise = (async () => {
       const provider = createPapiProvider(activeNetwork.assetHubGenesis);
       this.client = createClient(provider);
-      this.api = this.client.getTypedApi(paseohubnext);
+      this.api = this.client.getTypedApi(summitassethub);
 
       // Read NativeToEthRatio from Revive pallet runtime constants.
       // This is the conversion factor between native planck and EVM wei.
-      // On Paseo: 1e8 (18 EVM decimals - 10 native decimals = 8 digit difference).
+      // On Summit: 1e8 (18 EVM decimals - 10 native decimals = 8 digit difference).
       try {
         this._nativeToEvmRatio = BigInt(
           await this.api.constants.Revive.NativeToEthRatio(),
@@ -105,7 +105,7 @@ export function getNativeToEvmRatio(): bigint | null {
 
 /**
  * Async getter — waits for chain connection, then returns the ratio.
- * Falls back to 1e8 (Paseo default) if chain init fails.
+ * Falls back to 1e8 (Summit default) if chain init fails.
  */
 export async function waitForNativeToEvmRatio(): Promise<bigint> {
   try {
@@ -118,7 +118,7 @@ export async function waitForNativeToEvmRatio(): Promise<bigint> {
 
 /**
  * Compute EVM decimals from native token decimals and the on-chain ratio.
- * Falls back to 18 if the ratio is not yet loaded (safe for Paseo).
+ * Falls back to 18 if the ratio is not yet loaded (safe for Summit).
  */
 export function getEvmDecimals(nativeDecimals: number): number {
   const ratio = assetHubProvider.getNativeToEvmRatio();

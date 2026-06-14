@@ -23,7 +23,7 @@ dot.li is a decentralized universal resolver for Polkadot that enables:
 3. **Easy onboarding** - Share a link -> users get nudged to install Polkadot app
 4. **True decentralization** - Light clients validate chain state in-browser
 
-**Status:** Live on Paseo testnet. Demo: https://mytestapp.dot.li/
+**Status:** Live on Summit testnet. Demo: https://mytestapp.dot.li/
 
 ---
 
@@ -82,13 +82,13 @@ User enters: myapp.dot.li
 > contracts owned by LocalDOT. They do not appear anywhere in this repo's
 > source — LocalDOT only deploys [`P2PMarket.sol`](../../../packages/contracts/contracts/P2PMarket.sol)
 > and [`ZKPassportRegistry.sol`](../../../packages/contracts/contracts/ZKPassportRegistry.sol).
-> The addresses below were recorded against plain (legacy) Paseo Asset Hub.
-> **Confirm them against the Paseo Next Asset Hub (chainId 420420417,
-> https://eth-rpc-paseo-next.polkadot.io) before relying on them** — do not
+> The addresses below were recorded against plain (legacy) Summit Asset Hub.
+> **Confirm them against the Summit Asset Hub (chainId 420420417,
+> http://localhost:8545) before relying on them** — do not
 > assume they are deployed on the Next stack.
 
 ```typescript
-// Upstream dot.li (unverified on Paseo Next — confirm before use)
+// Upstream dot.li (unverified on Summit — confirm before use)
 DOTNS_REGISTRY: "0x4Da0d37aBe96C06ab19963F31ca2DC0412057a6f"
 DOTNS_CONTENT_RESOLVER: "0x7756DF72CBc7f062e7403cD59e45fBc78bed1cD7"
 ```
@@ -114,20 +114,20 @@ const cid = decodeContentHash(contentHash);
 ## Bulletin Chain P2P
 
 > Note: the `BULLETIN_PEERS` multiaddrs below point at **plain (non-Next)**
-> Paseo Bulletin collators and are unverified against the Next stack. LocalDOT
-> targets **Bulletin Next** (`wss://paseo-bulletin-next-rpc.polkadot.io`) and
-> does not bundle a Helia/libp2p P2P client — verify the correct Bulletin Next
+> Summit Bulletin collators and are unverified against the Next stack. LocalDOT
+> targets **Summit Bulletin** (`wss://summit-bulletin-rpc.polkadot.io`) and
+> does not bundle a Helia/libp2p P2P client — verify the correct Summit Bulletin
 > peer multiaddrs against the public network config before using these.
 
 ```typescript
-// Plain-Paseo collators — confirm Bulletin Next equivalents before use
+// Plain-Summit collators — confirm Summit Bulletin equivalents before use
 const BULLETIN_PEERS = [
-  "/dns4/paseo-bulletin-collator-node-0.internal-host.example/tcp/443/wss/p2p/12D3KooW...",
-  "/dns4/paseo-bulletin-collator-node-1.internal-host.example/tcp/443/wss/p2p/12D3KooW...",
+  "/dns4/summit-bulletin-collator-node-0.internal-host.example/tcp/443/wss/p2p/12D3KooW...",
+  "/dns4/summit-bulletin-collator-node-1.internal-host.example/tcp/443/wss/p2p/12D3KooW...",
 ];
 
-// Canonical Bulletin Next IPFS gateway (matches apps/web/src/lib/ipfs.ts)
-const IPFS_GATEWAY = "https://paseo-bulletin-next-ipfs.polkadot.io/ipfs/";
+// Canonical Summit Bulletin IPFS gateway (matches apps/web/src/lib/ipfs.ts)
+const IPFS_GATEWAY = "https://summit-ipfs.polkadot.io/ipfs/";
 ```
 
 ---
@@ -202,7 +202,7 @@ User joins ecosystem
 
 | Network | URL | Status |
 |---------|-----|--------|
-| Paseo | `*.dot.li` | Live |
+| Summit | `*.dot.li` | Live |
 | Polkadot | TBD | Planned |
 
 ---

@@ -35,9 +35,16 @@ const config: HardhatUserConfig = {
       chainId: 31337,
       blockGasLimit: 16777216,
     },
-    // Paseo Asset Hub Next (v2) — PRIVATE_KEY must be set in .env
-    paseo: {
-      url: process.env.PASEO_RPC_URL || 'https://eth-rpc-paseo-next.polkadot.io',
+    // Summit Asset Hub — PRIVATE_KEY must be set in .env.
+    // Summit has NO hosted public eth-rpc endpoint, so this Hardhat/ethers path
+    // needs a LOCAL revive eth-rpc adapter (the dotns revive adapter, base
+    // compose) bridging http://localhost:8545 → wss://summit-asset-hub-rpc.polkadot.io.
+    // Override with SUMMIT_RPC_URL if your adapter listens elsewhere.
+    // NOTE: the primary deploy path (scripts/deploy.ts → scripts/deploy-p2pmarket.ts)
+    // is PAPI/pallet-revive over WSS and needs NO adapter; this network is for the
+    // optional Hardhat deploy/verify/seed flow only.
+    summit: {
+      url: process.env.SUMMIT_RPC_URL || 'http://localhost:8545',
       chainId: 420420417,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
       polkadot: {
@@ -49,20 +56,10 @@ const config: HardhatUserConfig = {
     enabled: process.env.REPORT_GAS === 'true',
     currency: 'USD',
   },
+  // Summit has no public block explorer / verification API yet. When one is
+  // available, add it here as a `customChains` entry for the `summit` network.
   etherscan: {
-    apiKey: {
-      paseo: 'dummy',
-    },
-    customChains: [
-      {
-        network: 'paseo',
-        chainId: 420420417,
-        urls: {
-          apiURL: 'https://blockscout-paseo-next.polkadot.io/api',
-          browserURL: 'https://blockscout-paseo-next.polkadot.io',
-        },
-      },
-    ],
+    apiKey: {},
   },
   paths: {
     sources: './contracts',

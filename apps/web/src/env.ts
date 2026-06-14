@@ -10,12 +10,12 @@ import { DEFAULT_CHAIN } from "./lib/constants";
 interface Env {
   VITE_RPC_URL: string;
   VITE_CHAIN_ID: number;
-  /** Network key selecting the chain set (see lib/host/networks.ts). Defaults to paseo-next-v2. */
+  /** Network key selecting the chain set (see lib/host/networks.ts). Defaults to summit. */
   VITE_NETWORK?: string;
   VITE_P2PMARKET_ADDRESS?: string;
   VITE_ZKPASSPORT_REGISTRY_ADDRESS?: string;
   VITE_IPFS_GATEWAY?: string;
-  /** SS58 address used as origin for read-only contract queries (on Paseo Next v2 every account is auto-mapped, so any valid SS58 works). */
+  /** SS58 address used as origin for read-only contract queries (on Summit every account is auto-mapped, so any valid SS58 works). */
   VITE_READONLY_ORIGIN: string;
   /** Set to false to force standalone mode even when Host API is detected */
   VITE_USE_HOST_API?: boolean;

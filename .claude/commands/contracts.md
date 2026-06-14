@@ -7,7 +7,7 @@ Implement and maintain the LocalDOT smart contracts.
 > [`P2PMarket.sol`](../../packages/contracts/contracts/P2PMarket.sol) (`VERSION 7.0.0`)
 > and [`ZKPassportRegistry.sol`](../../packages/contracts/contracts/ZKPassportRegistry.sol) (`1.0.0`).
 > There is **no** `LocalDOTEscrow.sol` and **no** `MockERC20.sol`. Escrow holds the
-> **chain-native token** (PAS on testnet) via `msg.value` / `.call{value:}` — *not* an
+> **chain-native token** (SUM on testnet) via `msg.value` / `.call{value:}` — *not* an
 > ERC-20. A distinct traded token is conceptual only (priced at USD 1.00 on-chain); there is no
 > `IERC20` / `transferFrom` / `approve` anywhere. OpenZeppelin is a devDependency but
 > **unused** in source.
@@ -174,7 +174,7 @@ contract P2PMarket {
         tokenPricePerCurrency["USD"] = 100; // 1 token = 1.00 USD
     }
 
-    /// @notice Lock native tokens (PAS) for a trade. Either party can lock.
+    /// @notice Lock native tokens (SUM) for a trade. Either party can lock.
     function lockTrade(address counterparty, uint256 offerId, address agent)
         external payable noReentrant returns (uint256)
     {
@@ -257,23 +257,23 @@ const config: HardhatUserConfig = {
       chainId: 31337,
       blockGasLimit: 16777216,
     },
-    // Paseo Asset Hub Next (v2) — PRIVATE_KEY must be set in .env
-    paseo: {
-      url: process.env.PASEO_RPC_URL || 'https://eth-rpc-paseo-next.polkadot.io',
+    // Summit Asset Hub — PRIVATE_KEY must be set in .env
+    summit: {
+      url: process.env.SUMMIT_RPC_URL || 'http://localhost:8545',
       chainId: 420420417,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
       polkadot: { target: 'pvm' },
     },
   },
   etherscan: {
-    apiKey: { paseo: 'dummy' },
+    apiKey: { summit: 'dummy' },
     customChains: [
       {
-        network: 'paseo',
+        network: 'summit',
         chainId: 420420417,
         urls: {
-          apiURL: 'https://blockscout-paseo-next.polkadot.io/api',
-          browserURL: 'https://blockscout-paseo-next.polkadot.io',
+          apiURL: '<no Summit explorer API yet>',
+          browserURL: '<no Summit explorer yet>',
         },
       },
     ],
@@ -288,7 +288,7 @@ export default config;
   `resolc` binary is fetched by `pnpm download:binaries` (writes to `./bin/resolc`) — run
   it once before compiling.
 - Verification uses **Blockscout** (not Etherscan) at
-  `https://blockscout-paseo-next.polkadot.io`; the `etherscan.apiKey` is a placeholder.
+  `<no Summit explorer yet>`; the `etherscan.apiKey` is a placeholder.
 - Max contract size is 100KB on PVM (larger than EVM's 24KB).
 
 ---
@@ -303,7 +303,7 @@ export default config;
   10 offers (uses `AGENT1_KEY` / `AGENT2_KEY` / `PROVIDER1_KEY` / `PROVIDER2_KEY` from
   `.env`).
 
-Contract `.env` keys: `PRIVATE_KEY`, optional `PASEO_RPC_URL`, plus the seeding keys above.
+Contract `.env` keys: `PRIVATE_KEY`, optional `SUMMIT_RPC_URL`, plus the seeding keys above.
 
 Run from the repo root: `pnpm contracts:compile`, `pnpm contracts:test`,
 `pnpm contracts:deploy`, `pnpm contracts:seed`, `pnpm download:binaries`.
@@ -320,7 +320,7 @@ and are out of scope for V1 (see the project README/CLAUDE.md roadmap):
 - **On-chain disputes** — resolution is escrow + 24h timeout only.
 - **Reputation** — no on-chain scoring.
 - **Multi-asset / multi-currency** — native token only, USD priced 1.00.
-- **A real ERC-20 stablecoin** — today the escrow holds native PAS; a distinct traded
+- **A real ERC-20 stablecoin** — today the escrow holds native SUM; a distinct traded
   token is conceptual.
 - **Full PGAS gas sponsorship** — contract writes still require a funded account; the
   product account must hold native balance (faucet on testnet).

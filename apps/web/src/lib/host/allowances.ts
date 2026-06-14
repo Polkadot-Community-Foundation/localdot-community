@@ -27,7 +27,7 @@
  *      succeeds. Bridges the ~40s on-chain finality lag after a fresh claim.
  *   2. Authoritative fallback — when the flag is absent (cleared storage, new
  *      device, new session) we read the product account's PGAS asset balance
- *      on Asset Hub Next; a positive balance proves the on-chain allowance is
+ *      on Summit Asset Hub; a positive balance proves the on-chain allowance is
  *      already active, so we skip the modal and re-cache the flag.
  * The modal is therefore surfaced at most once per account, ever. Only the
  * cheap StatementSubmit permission is re-requested every session as a liveness
@@ -46,7 +46,7 @@
  *
  * Future PGAS gas-sponsorship would require populating the `AsPgas` signed
  * extension on each `Revive.call` — via PAPI `customSignedExtensions` on the
- * Asset Hub Next client — with the PGAS designation for this derivation index.
+ * Summit Asset Hub client — with the PGAS designation for this derivation index.
  * Confirm the extension's value shape against the chain's runtime metadata
  * before wiring, since a wrong value breaks signing.
  */
@@ -73,7 +73,7 @@ export interface BootstrapOpts {
 const DERIVATION_INDEX = 0;
 
 /**
- * PGAS asset id on Asset Hub Next. The `SmartContractAllowance` granted at
+ * PGAS asset id on Summit Asset Hub. The `SmartContractAllowance` granted at
  * bootstrap funds this asset on the product account; a positive balance is the
  * authoritative signal that the on-chain allowance is active. (Mirrors
  * w3s-conference-app's `checkAllowancesOnChain`.)
@@ -125,7 +125,7 @@ function clearAllowanceFlag(account: string): void {
 
 /**
  * Authoritative "already granted?" check: read the product account's PGAS
- * asset balance on Asset Hub Next. A positive balance means the
+ * asset balance on Summit Asset Hub. A positive balance means the
  * `SmartContractAllowance` has been activated on-chain, so the heavy allowance
  * modal can be skipped even with no localStorage flag. Never throws — a chain
  * read error degrades to `false` (we fall through to the request path, which

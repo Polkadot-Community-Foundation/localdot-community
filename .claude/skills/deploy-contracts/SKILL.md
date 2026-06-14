@@ -1,6 +1,6 @@
 ---
 name: deploy-contracts
-description: "Deploy smart contracts to Polkadot Asset Hub. Triggers: deploy, deployment, paseo, mainnet"
+description: "Deploy smart contracts to Polkadot Asset Hub. Triggers: deploy, deployment, summit, mainnet"
 ---
 
 # Deploy Contracts
@@ -15,7 +15,7 @@ description: "Deploy smart contracts to Polkadot Asset Hub. Triggers: deploy, de
 
 ## When to Activate
 
-- Deploying contracts to Paseo Asset Hub Next (testnet) or mainnet
+- Deploying contracts to Summit Asset Hub (testnet) or mainnet
 - Re-deploying after a contract change (every deploy is a fresh, non-upgradeable instance)
 - Seeding demo data after deployment
 
@@ -25,7 +25,7 @@ description: "Deploy smart contracts to Polkadot Asset Hub. Triggers: deploy, de
 |------|-------------|
 | Use Hardhat (`hardhat run`) for all deploys | REQUIRED — no Foundry in this repo |
 | `PRIVATE_KEY` set in `packages/contracts/.env` | REQUIRED before deployment |
-| Deployer account holds native PAS (faucet on testnet) | REQUIRED — no gas sponsorship wired |
+| Deployer account holds native SUM (faucet on testnet) | REQUIRED — no gas sponsorship wired |
 | Log all deployed addresses | REQUIRED (scripts also write them to env files) |
 | Contracts are non-upgradeable | A new deploy = new address; update env/CI accordingly |
 
@@ -33,19 +33,19 @@ description: "Deploy smart contracts to Polkadot Asset Hub. Triggers: deploy, de
 
 | Network | EVM RPC (ethers) | Chain ID | Use Case |
 |---------|------------------|----------|----------|
-| Paseo Asset Hub Next (testnet) | https://eth-rpc-paseo-next.polkadot.io | 420420417 | Integration / pre-prod |
+| Summit Asset Hub (testnet) | http://localhost:8545 | 420420417 | Integration / pre-prod |
 | Local Hardhat | (in-process) | 31337 | Unit tests |
 | Mainnet | TBD | TBD | Production |
 
-Block explorer (testnet): https://blockscout-paseo-next.polkadot.io
-Native token: **PAS** (10 decimals). Escrow uses the chain-native token via `msg.value`, not an ERC-20.
+Block explorer (testnet): <no Summit explorer yet>
+Native token: **SUM** (10 decimals). Escrow uses the chain-native token via `msg.value`, not an ERC-20.
 
 ## Deployment Workflow
 
 ### 1. Pre-deployment Checklist
 
 ```bash
-# Set PRIVATE_KEY (and optional PASEO_RPC_URL) in packages/contracts/.env
+# Set PRIVATE_KEY (and optional SUMMIT_RPC_URL) in packages/contracts/.env
 # Verify it's present
 grep -q '^PRIVATE_KEY=' packages/contracts/.env && echo 'PRIVATE_KEY set' || echo 'PRIVATE_KEY MISSING'
 
@@ -57,7 +57,7 @@ pnpm contracts:compile
 pnpm contracts:test
 ```
 
-### 2. Deploy P2PMarket to Paseo Asset Hub Next
+### 2. Deploy P2PMarket to Summit Asset Hub
 
 `scripts/deploy.ts` deploys **only** [`P2PMarket`](../../../packages/contracts/contracts/P2PMarket.sol),
 verifies its initial state (`VERSION`, `getOfferCount`), and writes the new address +
@@ -66,7 +66,7 @@ verifies its initial state (`VERSION`, `getOfferCount`), and writes the new addr
 ```bash
 # from packages/contracts
 pnpm deploy
-# i.e. hardhat run scripts/deploy.ts --network paseo
+# i.e. hardhat run scripts/deploy.ts --network summit
 ```
 
 Or from the repo root:
@@ -83,7 +83,7 @@ writes `VITE_ZKPASSPORT_REGISTRY_ADDRESS` into `apps/web/.env.local` and `.githu
 
 ```bash
 # from packages/contracts
-hardhat run scripts/deploy-zkpassport.ts --network paseo
+hardhat run scripts/deploy-zkpassport.ts --network summit
 ```
 
 ### 4. Seed Demo Data (optional)
@@ -104,14 +104,14 @@ pnpm contracts:seed
 The real config lives in
 [`packages/contracts/hardhat.config.ts`](../../../packages/contracts/hardhat.config.ts): solc
 `0.8.28`, optimizer runs `200`, `viaIR: true`, `resolc.compilerSource: 'binary'` with
-`resolcPath: './bin/resolc'`. The `paseo` network targets PolkaVM (`polkadot.target: 'pvm'`).
+`resolcPath: './bin/resolc'`. The `summit` network targets PolkaVM (`polkadot.target: 'pvm'`).
 
 ```typescript
 // hardhat.config.ts (excerpt)
 networks: {
   hardhat: { chainId: 31337, allowUnlimitedContractSize: true },
-  paseo: {
-    url: process.env.PASEO_RPC_URL || 'https://eth-rpc-paseo-next.polkadot.io',
+  summit: {
+    url: process.env.SUMMIT_RPC_URL || 'http://localhost:8545',
     chainId: 420420417,
     accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     polkadot: { target: 'pvm' },  // Required for PolkaVM
@@ -124,7 +124,7 @@ resolc: {
 ```
 
 Blockscout verification is configured via the `etherscan` customChains entry pointing at
-`https://blockscout-paseo-next.polkadot.io/api`.
+`<no Summit explorer API yet>`.
 
 ### Verify PolkaVM Compilation
 
@@ -144,7 +144,7 @@ jq -r '.bytecode' packages/contracts/artifacts/contracts/P2PMarket.sol/P2PMarket
 | Nonce too low | Wait and retry, or check pending transactions |
 | Out of gas | Increase gas limit: `gasLimit: 10_000_000n` |
 | Signature invalid | Check `PRIVATE_KEY` format (with `0x` prefix) |
-| Contract write reverts / "insufficient funds" | Deployer/product account needs native PAS — no gas sponsorship is wired |
+| Contract write reverts / "insufficient funds" | Deployer/product account needs native SUM — no gas sponsorship is wired |
 
 ### "Transaction is temporarily banned" Workaround
 
@@ -156,7 +156,7 @@ gas params:
 import { ethers } from 'ethers';
 import fs from 'fs';
 
-const provider = new ethers.JsonRpcProvider('https://eth-rpc-paseo-next.polkadot.io');
+const provider = new ethers.JsonRpcProvider('http://localhost:8545');
 const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
 const artifact = JSON.parse(
   fs.readFileSync('./artifacts/contracts/P2PMarket.sol/P2PMarket.json', 'utf8'),
@@ -195,7 +195,7 @@ change you deploy a fresh instance and point the frontend at the new address:
 ```bash
 # NOTE: this repo has no foundry.toml / *.s.sol. Reference only.
 source .env
-forge script script/Deploy.s.sol --rpc-url paseo --broadcast --slow -vvvv
+forge script script/Deploy.s.sol --rpc-url summit --broadcast --slow -vvvv
 ```
 
 ### UUPS proxy pattern (reference only)
@@ -222,7 +222,7 @@ MyContract(proxyAddress).upgradeToAndCall(address(newImpl), "");
 | Pattern | Status | Reason |
 |---------|--------|--------|
 | Deploy without checking `PRIVATE_KEY` | FORBIDDEN | Missing key fails silently |
-| Forget to fund the deployer with native PAS | FORBIDDEN | No gas sponsorship — writes revert |
+| Forget to fund the deployer with native SUM | FORBIDDEN | No gas sponsorship — writes revert |
 | Forget to update `apps/web/.env.local` / `.github/env` | FORBIDDEN | Frontend points at stale address |
 | (Foundry-specific) Deploy without `--slow` | N/A | Foundry not used here |
 | (Proxy-specific) Initialize in constructor | N/A | No proxies/initializers here |
