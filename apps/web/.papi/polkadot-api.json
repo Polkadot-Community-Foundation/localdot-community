@@ -5,17 +5,20 @@
     "summitassethub": {
       "wsUrl": "wss://summit-asset-hub-rpc.polkadot.io",
       "metadata": ".papi/metadata/summitassethub.scale",
-      "genesis": "0xf388dc6d6cdf6fb77eac3c4a91f31bc0c8642b142f1a757512ab7849f9f70660"
+      "genesis": "0xf388dc6d6cdf6fb77eac3c4a91f31bc0c8642b142f1a757512ab7849f9f70660",
+      "codeHash": "0x9ccee8fcad38a5068147eba6f7f62d66d244c883092a9fcb1378e6d0f8258609"
     },
     "summitbulletin": {
       "wsUrl": "wss://summit-bulletin-rpc.polkadot.io",
       "metadata": ".papi/metadata/summitbulletin.scale",
-      "genesis": "0x147aae0d60625af72300d4d5ebd5dcb869f7ac4c6c1a326be1cbb14a4a65ae77"
+      "genesis": "0x147aae0d60625af72300d4d5ebd5dcb869f7ac4c6c1a326be1cbb14a4a65ae77",
+      "codeHash": "0xbf2cd56d20198f00ab6f38d7e77f15a9d5671d47beb5d456012ed45d23572045"
     },
     "summitpeople": {
       "wsUrl": "wss://summit-people-rpc.polkadot.io",
       "metadata": ".papi/metadata/summitpeople.scale",
-      "genesis": "0xbe5238f82c3553bc57ac3be43bef110bd58c49ad0744110814985195ca7d8c4e"
+      "genesis": "0xbe5238f82c3553bc57ac3be43bef110bd58c49ad0744110814985195ca7d8c4e",
+      "codeHash": "0x5a93619ebbd5d28ea82fc159f6b01e8610e32ca1e1a00acb934e76757fd0c387"
     }
   },
   "sol": {

@@ -9,10 +9,10 @@
  */
 
 import { createPapiProvider } from "@novasamatech/host-api-wrapper";
+import { summitassethub } from "@polkadot-api/descriptors";
 import type { PolkadotClient, TypedApi } from "polkadot-api";
 import { createClient } from "polkadot-api";
 
-import { summitassethub } from "@polkadot-api/descriptors";
 import { activeNetwork } from "./networks";
 
 class AssetHubProviderManager {

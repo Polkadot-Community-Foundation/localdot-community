@@ -14,6 +14,10 @@ export default [
       "tailwind.config.ts",
       "postcss.config.cjs",
       "playwright.config.ts",
+      // Build-time product manifest, loaded by polkadot-app-deploy via jiti and
+      // excluded from tsconfig — not app source, so keep it out of type-aware lint
+      // (same treatment as the other *.config.ts above).
+      "polkadot-app-deploy.config.ts",
       "**/*.test.ts",
       "**/*.test.tsx",
       "e2e/**",

@@ -3,10 +3,10 @@
  * Not part of the public API — consumers should import from `./index` instead.
  */
 
+import type { summitassethub } from "@polkadot-api/descriptors";
 import type { SizedHex, TypedApi } from "polkadot-api";
 import { Binary } from "polkadot-api";
 
-import type { summitassethub } from "@polkadot-api/descriptors";
 import { env } from "../../env";
 import { ss58ToEvmAddress } from "../address";
 import { DEFAULT_CHAIN, MIN_GAS_BALANCE_NATIVE } from "../constants";
