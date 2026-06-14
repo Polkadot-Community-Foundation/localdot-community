@@ -19,7 +19,7 @@ behaviour. (NOT polkadot-1p chat.)
 
 **Transport:** Statement Store, topic-based routing. There is **no Bulletin Chain
 `system.remark` fallback** — publish goes through the host's statement-store slot,
-subscribe goes direct over People Next JSON-RPC.
+subscribe goes direct over Summit People JSON-RPC.
 
 - **Publish** is host-mediated:
   `hostStatementStore.createProof(...)` signs, then `hostStatementStore.submit(...)`
@@ -29,8 +29,8 @@ subscribe goes direct over People Next JSON-RPC.
   direct SDK client would bypass that allowance attribution, so we deliberately
   do not use `sdk.submit(...)` for writes.
 - **Subscribe** uses the `@novasamatech/sdk-statement` SDK over a direct
-  WebSocket (`getWsProvider` from `polkadot-api/ws`) to **People Next**
-  (`wss://paseo-people-next-system-rpc.polkadot.io`). Reads are unauthenticated —
+  WebSocket (`getWsProvider` from `polkadot-api/ws`) to **Summit People**
+  (`wss://summit-people-rpc.polkadot.io`). Reads are unauthenticated —
   no allowance needed.
 - **No encryption in V1** — wire bytes are `JSON.stringify({ v: 1, p: payload })`.
 
@@ -39,7 +39,7 @@ subscribe goes direct over People Next JSON-RPC.
 > granted `BulletinAllowance` + `StatementStoreAllowance` + `SmartContractAllowance`
 > and the JIT `StatementSubmit` permission. `SmartContractAllowance` means
 > **auto-signing of `Revive.call` writes**, NOT gas sponsorship — the product
-> account must still hold native PAS for any contract write.
+> account must still hold native SUM for any contract write.
 
 ---
 
@@ -221,7 +221,7 @@ export function startMessageSubscriber(
 
 ## SDK singleton
 
-`getSdk()` opens one WebSocket to People Next on first call and wraps the
+`getSdk()` opens one WebSocket to Summit People on first call and wraps the
 `@polkadot-api/substrate-client` callback API into the Promise-based `requestFn`
 (for `statement_submit`) and callback-based `subscribeFn` (for
 `statement_subscribeStatement`) that `createStatementSdk` expects.
@@ -278,7 +278,7 @@ There is **no chat window**. Trade signaling appears in:
 - [ ] Delivery acks resolve to a "delivered" indicator on the sender side
 - [ ] Error states show helpful messages (e.g. "No active session — sign in…")
 - [ ] Works on mobile (375px)
-- [ ] Full trade flow works on Paseo Next v2 testnet (end-to-end)
+- [ ] Full trade flow works on Summit testnet (end-to-end)
 - [ ] No console errors in browser DevTools
 - [ ] `pnpm audit` shows no high/critical vulnerabilities
 - [ ] Code ready for security audit review

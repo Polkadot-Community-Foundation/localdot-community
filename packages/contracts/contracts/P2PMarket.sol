@@ -6,7 +6,7 @@ pragma solidity ^0.8.28;
  * @notice P2P marketplace with handoff agents and native-token escrow
  * @dev Agents register as physical locations. Providers create offers and choose
  *      which agents to work with. Users browse agents/offers and trade in person.
- *      Escrow: either party locks native tokens (PAS), all parties confirm,
+ *      Escrow: either party locks native tokens (SUM), all parties confirm,
  *      funds release to counterparty. 24h timeout → refund to locker.
  */
 contract P2PMarket {
@@ -149,7 +149,7 @@ contract P2PMarket {
         uint256 flatFee;        // Informational only — paid in cash at location
         bool active;
         uint256 registeredAt;
-        uint256 stakedAmount;   // Insurance stake (PAS) — reserved for dispute resolution
+        uint256 stakedAmount;   // Insurance stake (SUM) — reserved for dispute resolution
         uint8 holdHours;        // Hours agent will hold cash before late fees apply (>= MIN_HOLD_HOURS)
         uint256 extraHourFee;   // Flat fee per extra hour over holdHours (cash, off-chain)
     }
@@ -648,7 +648,7 @@ contract P2PMarket {
     // ═══ ESCROW FUNCTIONS ═══
     // ═══════════════════════════════════════════
 
-    /// @notice Lock native tokens (PAS) for a trade. Either party can lock.
+    /// @notice Lock native tokens (SUM) for a trade. Either party can lock.
     /// @param counterparty Address that will receive funds after confirmation
     /// @param offerId Link to an existing offer (0 for ad-hoc). Validates amount against offer.
     /// @param agent Agent address for witnessed trade (address(0) for direct)

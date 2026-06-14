@@ -18,39 +18,39 @@ description: "Deploy frontend to Bulletin Chain + DotNS. Triggers: deploy fronte
 |------|-------------|
 | Use `base: './'` in Vite config | REQUIRED (IPFS-compatible paths) — already set |
 | Never commit the mnemonic / `MNEMONIC` secret | FORBIDDEN |
-| Target Paseo Next v2 chains (not legacy `asset-hub-paseo`) | REQUIRED |
-| Set Personhood (PoP) before domain registration | dotns-sdk CLI path only — NOT required by `bulletin-deploy` on dev signers |
-| Authorize for Bulletin before upload | dotns-sdk CLI path only — NOT required by `bulletin-deploy` |
+| Target Summit chains (not legacy `asset-hub-legacy`) | REQUIRED |
+| Set Personhood (PoP) before domain registration | dotns-sdk CLI path only — NOT required by `polkadot-app-deploy` on dev signers |
+| Authorize for Bulletin before upload | dotns-sdk CLI path only — NOT required by `polkadot-app-deploy` |
 
 ## Prerequisites
 
 1. **Node.js 22+** (pnpm ≥ 10; repo pins `pnpm@10.8.0`). Bun is only needed for the lower-level `dotns-sdk` CLI path.
-2. **`bulletin-deploy`** (`npm install -g bulletin-deploy@latest`) — the tool the live deploy uses. The `dotns-sdk` CLI (https://github.com/paritytech/dotns-sdk) is an optional lower-level alternative.
-3. **Wallet with PAS tokens** on **Asset Hub Next** (Paseo Next v2). Native token is PAS (10 decimals); fund from the testnet faucet.
+2. **`polkadot-app-deploy`** (`npm install -g polkadot-app-deploy@latest`) — the tool the live deploy uses. The `dotns-sdk` CLI (https://github.com/paritytech/dotns-sdk) is an optional lower-level alternative.
+3. **Wallet with SUM tokens** on **Summit Asset Hub** (Summit). Native token is SUM (10 decimals); fund from the testnet faucet.
 4. **Vite config** with `base: './'` — already set in [`apps/web/vite.config.ts`](../../../apps/web/vite.config.ts) for Bulletin / IPFS static hosting.
 
 ## Chains Involved
 
 | Chain | Purpose | Endpoint |
 |-------|---------|----------|
-| Asset Hub Next (Paseo) | Domain registration, content hash | `wss://paseo-asset-hub-next-rpc.polkadot.io` |
-| Bulletin Next (Paseo) | Decentralized storage | `wss://paseo-bulletin-next-rpc.polkadot.io` |
+| Summit Asset Hub (Summit) | Domain registration, content hash | `wss://summit-asset-hub-rpc.polkadot.io` |
+| Summit Bulletin (Summit) | Decentralized storage | `wss://summit-bulletin-rpc.polkadot.io` |
 
-> NOTE — RPC endpoint: this repo targets the **Paseo Next v2** stack. Any
-> `wss://asset-hub-paseo-rpc.n.dwellir.com` / `asset-hub-paseo` endpoint points at
+> NOTE — RPC endpoint: this repo targets the **Summit** stack. Any
+> `wss://asset-hub-legacy-rpc.example` / `asset-hub-legacy` endpoint points at
 > the **legacy (non-Next)** Asset Hub and must not be used. dotNS registration
-> here happens on **Asset Hub Next** (`wss://paseo-asset-hub-next-rpc.polkadot.io`,
-> EVM chainId `420420417`, eth-rpc `https://eth-rpc-paseo-next.polkadot.io`). The
-> `bulletin-deploy --env paseo-next-v2` flag selects the correct Next chains for
+> here happens on **Summit Asset Hub** (`wss://summit-asset-hub-rpc.polkadot.io`,
+> EVM chainId `420420417`, eth-rpc `http://localhost:8545`). The
+> `polkadot-app-deploy --env summit` flag selects the correct Next chains for
 > you, so you do not pass these WSS endpoints by hand.
 
 ## First-Time Setup (REQUIRED)
 
-> NOTE — how THIS repo deploys: the live path is the manual `bulletin-deploy`
+> NOTE — how THIS repo deploys: the live path is the manual `polkadot-app-deploy`
 > flow documented in [`/deploy`](../../commands/deploy.md) (wrapped by the
 > one-command `pnpm run deploy`), which uses the
-> `bulletin-deploy --env paseo-next-v2` tool — not the `dotns-sdk` CLI directly.
-> On the Paseo Next v2 dev signers, the chosen domain label (≥9 alphanumeric chars
+> `polkadot-app-deploy --env summit` tool — not the `dotns-sdk` CLI directly.
+> On the Summit dev signers, the chosen domain label (≥9 alphanumeric chars
 > + 2 trailing digits) needs **no PoP**, so Steps 1–2 below are only needed if you
 > drive the lower-level `dotns-sdk` CLI yourself. The `dotns-sdk` commands here are
 > kept as generic reference for that path. All `dotns-sdk` examples assume you have
@@ -58,7 +58,7 @@ description: "Deploy frontend to Bulletin Chain + DotNS. Triggers: deploy fronte
 
 ### Step 1: Set Personhood (PoP) Lite
 
-**Only when driving the `dotns-sdk` CLI directly. `bulletin-deploy` does not require this on dev signers.**
+**Only when driving the `dotns-sdk` CLI directly. `polkadot-app-deploy` does not require this on dev signers.**
 
 ```bash
 # From your local clone of the dotns-sdk (path is yours, not part of this repo):
@@ -132,12 +132,12 @@ bun run src/cli/index.ts register domain \
 - Reserved names (<=5 chars) require `--governance` flag
 - Dev signers WITHOUT PoP must use the workaround label form: ≥9 alphanumeric chars + 2 trailing digits. With PoP (personhood) set on the signer, clean human-readable labels are accepted.
 
-> NOTE — domain: the **live** dotNS label is `localdot.dot`, per the manual
-> `bulletin-deploy` flow in [`/deploy`](../../commands/deploy.md). This is possible
+> NOTE — domain: the **live** dotNS label is `localmarket.dot`, per the manual
+> `polkadot-app-deploy` flow in [`/deploy`](../../commands/deploy.md). This is possible
 > because the deploy signer has PoP set; earlier drafts used the digit-suffixed
 > workaround (`localdott33.dot`, `localdot10.dot`) and one said `local-dot.dot`.
 > Treat the `/deploy` command doc as the source of truth. The examples below use
-> `localdot.dot` to match.
+> `localmarket.dot` to match.
 
 ### Step 4: Upload to Bulletin Chain
 
@@ -173,9 +173,9 @@ bun run src/cli/index.ts content view <domain-name>
 ```
 
 **Access your site:**
-- **dot.li (recommended):** `https://localdot.dot.li/` (client-side resolution, no proxy)
-- Paseo gateway: `https://localdot.paseo.li/`
-- Bulletin Next IPFS gateway: `https://paseo-bulletin-next-ipfs.polkadot.io/ipfs/<cid>` (this is the gateway the app uses; matches `VITE_IPFS_GATEWAY` in [`.github/env`](../../../.github/env))
+- **dot.li (recommended):** `https://localmarket.dot.li/` (client-side resolution, no proxy)
+- Summit gateway: `https://localmarket.dot.li/`
+- Summit Bulletin IPFS gateway: `https://summit-ipfs.polkadot.io/ipfs/<cid>` (this is the gateway the app uses; matches `VITE_IPFS_GATEWAY` in [`.github/env`](../../../.github/env))
 - public fallback: `https://dweb.link/ipfs/<cid>`
 
 **See also:** [`../dotli/SKILL.md`](../dotli/SKILL.md) for understanding client-side resolution architecture.
@@ -196,21 +196,21 @@ export default defineConfig({
 
 ## Quick Deploy (recommended)
 
-The live deploy uses `bulletin-deploy` (build + Bulletin upload + dotNS content-hash
+The live deploy uses `polkadot-app-deploy` (build + Bulletin upload + dotNS content-hash
 in one command). Run from the **repo root**:
 
 ```bash
 #!/bin/bash
 set -e
 
-DOMAIN="localdot.dot"
+DOMAIN="localmarket.dot"
 
 echo "Building..."
 pnpm --filter @localdot/web build   # output: apps/web/dist
 
 echo "Publishing to Bulletin + dotNS..."
-npm install -g bulletin-deploy@latest
-MNEMONIC="$DOTNS_MNEMONIC" bulletin-deploy --env paseo-next-v2 './apps/web/dist' "$DOMAIN"
+npm install -g polkadot-app-deploy@latest
+MNEMONIC="$DOTNS_MNEMONIC" polkadot-app-deploy --env summit './apps/web/dist' "$DOMAIN"
 
 echo "Done! https://${DOMAIN%.dot}.dot.li/"
 ```
@@ -218,7 +218,7 @@ echo "Done! https://${DOMAIN%.dot}.dot.li/"
 > A single one-click deploy script that wraps **both** halves of a release — compile +
 > deploy the contracts ([`packages/contracts/scripts/deploy.ts`](../../../packages/contracts/scripts/deploy.ts) →
 > writes addresses into `.github/env` and `apps/web/.env.local`) **and** publish the
-> frontend via `bulletin-deploy` — is in progress and will wrap the steps above.
+> frontend via `polkadot-app-deploy` — is in progress and will wrap the steps above.
 > Until it lands, run the contract deploy (`pnpm contracts:deploy`) and the frontend
 > publish (above) separately.
 
@@ -235,26 +235,26 @@ CID=$(bun run src/cli/index.ts bulletin upload ./apps/web/dist \
   -m "$DOTNS_MNEMONIC" 2>&1 | grep "cid:" | awk '{print $2}')
 echo "CID: $CID"
 
-bun run src/cli/index.ts content set localdot.dot "$CID" -m "$DOTNS_MNEMONIC"
+bun run src/cli/index.ts content set localmarket.dot "$CID" -m "$DOTNS_MNEMONIC"
 ```
 
 ## Environment Variables
 
 The CI deploy reads the signing seed from the `MNEMONIC` GitHub secret (used by
-`bulletin-deploy`). When driving a CLI locally:
+`polkadot-app-deploy`). When driving a CLI locally:
 
 ```bash
 # Add to .env (NEVER COMMIT)
 DOTNS_MNEMONIC="your 12 word mnemonic"
 
 # Optional — for the dotns-sdk CLI path only.
-# Must be the Paseo NEXT Asset Hub, NOT the legacy asset-hub-paseo endpoint.
-DOTNS_RPC=wss://paseo-asset-hub-next-rpc.polkadot.io
+# Must be the Summit Asset Hub, NOT the legacy asset-hub-legacy endpoint.
+DOTNS_RPC=wss://summit-asset-hub-rpc.polkadot.io
 DOTNS_KEYSTORE_PATH=~/.dotns/keystore
 DOTNS_KEYSTORE_PASSWORD=your-password
 ```
 
-Build-time `VITE_*` config (including `VITE_IPFS_GATEWAY=https://paseo-bulletin-next-ipfs.polkadot.io/ipfs/`)
+Build-time `VITE_*` config (including `VITE_IPFS_GATEWAY=https://summit-ipfs.polkadot.io/ipfs/`)
 lives in [`.github/env`](../../../.github/env), not here.
 
 ## Troubleshooting
@@ -265,7 +265,7 @@ lives in [`.github/env`](../../../.github/env), not here.
 | "Account is not authorized for Bulletin" | Run `bulletin authorize` (see First-Time Setup) |
 | Assets return 404 on IPFS | Add `base: './'` to Vite config, rebuild |
 | "Missing WebSocket class" | Use Node.js 22+ or Bun |
-| "Insufficient balance" | Fund the signing account with PAS from the Paseo Next faucet (no PGAS gas sponsorship is wired) |
+| "Insufficient balance" | Fund the signing account with SUM from the Summit faucet (no PGAS gas sponsorship is wired) |
 | Domain already registered | Check owner: `dotns lookup owner-of <domain>` |
 
 ## Common Commands Reference
@@ -290,6 +290,6 @@ bun run src/cli/index.ts lookup name <domain-name>
 |---------|--------|--------|
 | Commit the mnemonic / `MNEMONIC` to git | FORBIDDEN | Security risk |
 | Use absolute paths in build (`base: '/'`) | FORBIDDEN | Breaks on IPFS gateways; repo uses `base: './'` |
-| Point dotNS at legacy `asset-hub-paseo` | FORBIDDEN | Must use Asset Hub **Next** (Paseo Next v2) |
-| Deploy to mainnet first | FORBIDDEN | Test on Paseo Next first |
-| Skip PoP / Bulletin auth on the dotns-sdk CLI path | FORBIDDEN | Registration / upload will fail (N/A for `bulletin-deploy` on dev signers) |
+| Point dotNS at legacy `asset-hub-legacy` | FORBIDDEN | Must use Asset Hub **Next** (Summit) |
+| Deploy to mainnet first | FORBIDDEN | Test on Summit first |
+| Skip PoP / Bulletin auth on the dotns-sdk CLI path | FORBIDDEN | Registration / upload will fail (N/A for `polkadot-app-deploy` on dev signers) |

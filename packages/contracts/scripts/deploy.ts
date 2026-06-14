@@ -32,8 +32,8 @@ function updateEnvFile(marketAddress: string, chainId: bigint): void {
     envContent += `\nVITE_CHAIN_ID=${chainId}`;
   }
 
-  // Update or add VITE_RPC_URL (eth-rpc proxy for the Paseo Next v2 AH)
-  const rpcUrl = 'https://eth-rpc-paseo-next.polkadot.io';
+  // Update or add VITE_RPC_URL (eth-rpc URL stored for the app (display only); Summit has no hosted eth-rpc)
+  const rpcUrl = "";
   if (envContent.includes('VITE_RPC_URL=')) {
     envContent = envContent.replace(/^VITE_RPC_URL=.*/m, `VITE_RPC_URL=${rpcUrl}`);
   } else {

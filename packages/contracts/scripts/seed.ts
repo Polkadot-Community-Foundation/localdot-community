@@ -128,7 +128,7 @@ async function main() {
   console.log('Registering Agent 1 (Western Union — city center)...');
   const a1Cid = await uploadMetadataIfNeeded(agent1Meta, uploadOptions);
   console.log(`  ✓ Metadata: ${a1Cid.cid}`);
-  const agent1Stake = toTokens('800'); // 800 PAS insurance
+  const agent1Stake = toTokens('800'); // 800 SUM insurance
   const a1Tx = await market
     .connect(agent1)
     .registerAgent('Western Union', a1Cid.cid, 5n, 24n, 1n, { value: agent1Stake });
@@ -157,7 +157,7 @@ async function main() {
   console.log('Registering Agent 2 (MoneyGram — Petrovaradin)...');
   const a2Cid = await uploadMetadataIfNeeded(agent2Meta, uploadOptions);
   console.log(`  ✓ Metadata: ${a2Cid.cid}`);
-  const agent2Stake = toTokens('700'); // 700 PAS insurance
+  const agent2Stake = toTokens('700'); // 700 SUM insurance
   const a2Tx = await market
     .connect(agent2)
     .registerAgent('MoneyGram', a2Cid.cid, 3n, 24n, 1n, { value: agent2Stake });

@@ -6,10 +6,10 @@
  *   2. fund the printed address (faucet link, then press Enter),
  *   3. compile + deploy the P2PMarket contract (PAPI / pallet-revive),
  *   4. build the web app (Vite static export), and
- *   5. publish it to a .dot domain via bulletin-deploy.
+ *   5. publish it to a .dot domain via polkadot-app-deploy.
  *
  * A single Substrate mnemonic is used end-to-end: it signs the contract
- * instantiate (PAPI) and is handed to bulletin-deploy via the MNEMONIC env var
+ * instantiate (PAPI) and is handed to polkadot-app-deploy via the MNEMONIC env var
  * for the publish. The mnemonic only ever lives in memory — it is never written
  * to disk. The contract deploy writes the resulting H160 + chain into
  * apps/web/.env.local (gitignored) so the static build inlines them.
@@ -42,8 +42,8 @@ const ARTIFACT = resolve(
   "packages/contracts/artifacts/contracts/P2PMarket.sol/P2PMarket.json",
 );
 
-// bulletin-deploy --env id for the Paseo Next v2 Bulletin chain.
-const BULLETIN_ENV = "paseo-next-v2";
+// polkadot-app-deploy --env id for the Summit Bulletin chain.
+const BULLETIN_ENV = "summit";
 // There is no default domain — the operator must choose a label at the prompt.
 // The DotNS naming policy that governs which labels are registrable is documented
 // (and surfaced to the operator) at the Domain prompt below; it assumes a NoStatus
@@ -51,13 +51,17 @@ const BULLETIN_ENV = "paseo-next-v2";
 const GATEWAY_BASE = process.env.DOTNS_GATEWAY_BASE ?? "dot.li";
 // Funding floor checked before spending. The deploy pays the contract's code +
 // storage deposit and the .dot registration; the dry-run computes the exact
-// contract cost, this is just a pre-flight gate.
-const MIN_FUNDING_PAS = 20;
-// Pin a floor: older bulletin-deploy (0.7.x) fails preflight ("Cannot decode
-// zero data") and prompts for a mid-deploy self-upgrade. Below this we fetch a
-// known-good build via npx instead.
-const MIN_BULLETIN_DEPLOY_VERSION = "0.8.3";
-// bulletin-deploy stores a paired mobile (QR `login`) session here; 0.8.x prefers
+// contract cost, this is just a pre-flight gate. SUM has 10 decimals.
+const MIN_FUNDING_SUM = 20;
+// The scoped publish CLI. polkadot-app-deploy@0.10.1 carries the `summit` env
+// (Summit Asset Hub / Bulletin / RPCs + the summit-ipfs gateway) and the manifest
+// direct-signer fix; the unscoped legacy `polkadot-app-deploy` does not ship `summit`.
+const PUBLISH_PACKAGE = "@polkadot-community-foundation/polkadot-app-deploy";
+const PUBLISH_BIN = "polkadot-app-deploy";
+// Pin a floor: the `summit` env is only available from 0.10.1. Below this we fetch
+// a known-good build via npx instead.
+const MIN_PUBLISH_VERSION = "0.10.1";
+// polkadot-app-deploy stores a paired mobile (QR `login`) session here; it prefers
 // it over the MNEMONIC we pass, so we detect it before publishing.
 const SSO_SESSION_FILE = resolve(homedir(), ".polkadot-apps", "dot-cli_SsoSessions.json");
 
@@ -85,51 +89,52 @@ function versionGte(current: string, minimum: string): boolean {
   return true;
 }
 
-/** Probe the installed bulletin-deploy. Returns its version string, or null if it isn't on PATH. */
-function probeBulletinDeployVersion(): string | null {
-  const probe = spawnSync("bulletin-deploy", ["--version"], { encoding: "utf8" });
+/** Probe the installed polkadot-app-deploy. Returns its version string, or null if it isn't on PATH. */
+function probePublishVersion(): string | null {
+  const probe = spawnSync(PUBLISH_BIN, ["--version"], { encoding: "utf8" });
   if (probe.error || probe.status !== 0) return null;
+  // The CLI banner is e.g. `polkadot-app-deploy vX.Y.Z`; parseSemver extracts the X.Y.Z.
   return `${probe.stdout ?? ""}${probe.stderr ?? ""}`.trim();
 }
 
 function isUsableVersion(version: string | null): version is string {
-  return !!version && !!parseSemver(version) && versionGte(version, MIN_BULLETIN_DEPLOY_VERSION);
+  return !!version && !!parseSemver(version) && versionGte(version, MIN_PUBLISH_VERSION);
 }
 
 /**
- * Ensure a recent bulletin-deploy is available. If a good one is already on the
- * machine, use it. If it's missing or too old, install the latest globally
- * (`npm i -g bulletin-deploy@latest`) so this and future deploys reuse it. The
- * floor avoids older builds that fail preflight and prompt for a mid-deploy
- * self-upgrade. Only if a global install isn't possible (e.g. no write access to
- * the global prefix) do we fall back to a throwaway `npx` fetch. Returns the
- * argv prefix to spawn.
+ * Ensure a recent polkadot-app-deploy is available. If a good one is already on
+ * the machine, use it. If it's missing or too old, install the pinned version
+ * globally (`npm i -g @polkadot-community-foundation/polkadot-app-deploy@0.10.1`)
+ * so this and future deploys reuse it. The floor guarantees the `summit` env is
+ * present. Only if a global install isn't possible (e.g. no write access to the
+ * global prefix) do we fall back to a throwaway `npx` fetch. Returns the argv
+ * prefix to spawn.
  */
-function resolveBulletinDeployCommand(): string[] {
-  const installed = probeBulletinDeployVersion();
+function resolvePublishCommand(): string[] {
+  const installed = probePublishVersion();
   if (isUsableVersion(installed)) {
     ui.success(`${installed} (installed)`);
-    return ["bulletin-deploy"];
+    return [PUBLISH_BIN];
   }
 
   if (installed) {
-    ui.warn(`${installed} is older than ${MIN_BULLETIN_DEPLOY_VERSION} — installing latest globally…`);
+    ui.warn(`${installed} is older than ${MIN_PUBLISH_VERSION} — installing ${MIN_PUBLISH_VERSION} globally…`);
   } else {
-    ui.info("bulletin-deploy not found — installing latest globally (npm i -g)…");
+    ui.info(`${PUBLISH_BIN} not found — installing ${MIN_PUBLISH_VERSION} globally (npm i -g)…`);
   }
 
-  const install = spawnSync("npm", ["install", "-g", "bulletin-deploy@latest"], { stdio: "inherit" });
+  const install = spawnSync("npm", ["install", "-g", `${PUBLISH_PACKAGE}@${MIN_PUBLISH_VERSION}`], { stdio: "inherit" });
   if (install.status === 0) {
-    const after = probeBulletinDeployVersion();
+    const after = probePublishVersion();
     if (isUsableVersion(after)) {
       ui.success(`${after} (installed)`);
-      return ["bulletin-deploy"];
+      return [PUBLISH_BIN];
     }
-    ui.warn("Global install completed but bulletin-deploy still isn't usable — falling back to npx.");
+    ui.warn(`Global install completed but ${PUBLISH_BIN} still isn't usable — falling back to npx.`);
   } else {
-    ui.warn("Global install failed (npm i -g) — falling back to npx latest for this run.");
+    ui.warn("Global install failed (npm i -g) — falling back to npx for this run.");
   }
-  return ["npx", "-y", "bulletin-deploy@latest"];
+  return ["npx", "-y", `${PUBLISH_PACKAGE}@${MIN_PUBLISH_VERSION}`];
 }
 
 async function resolveWallet(rl: Interface): Promise<string> {
@@ -219,10 +224,10 @@ function runBuild(domain: string): void {
 
 function publishDapp(command: string[], domain: string, seed: string): void {
   ui.section("Publish");
-  ui.step(`bulletin-deploy --env ${BULLETIN_ENV} → ${domain}…`);
+  ui.step(`${PUBLISH_BIN} --env ${BULLETIN_ENV} → ${domain}…`);
   const [bin, ...prefixArgs] = command;
   const args = [...prefixArgs, "--env", BULLETIN_ENV, WEB_DIST, domain];
-  // bulletin-deploy merkleizes via a local IPFS (kubo); if it isn't usable, fall
+  // polkadot-app-deploy merkleizes via a local IPFS (kubo); if it isn't usable, fall
   // back to its pure-JS merkleizer so no kubo install/init is required. Probe a
   // repo-bound command (`ipfs repo stat`) rather than `--version`: the binary can
   // be present while the repo is uninitialized (no ~/.ipfs), and `--version`
@@ -236,21 +241,21 @@ function publishDapp(command: string[], domain: string, seed: string): void {
     cwd: REPO_ROOT,
     stdio: "inherit",
     // MNEMONIC stays in-memory only — never written to disk. NODE_OPTIONS mirrors
-    // CI so the publish doesn't OOM on the bundle. BULLETIN_DEPLOY_DOMAIN is read
-    // by apps/web/bulletin-deploy.config.ts so the published manifest's `domain`
-    // matches the label we're deploying to (publishManifest aborts otherwise).
+    // CI so the publish doesn't OOM on the bundle. POLKADOT_APP_DEPLOY_DOMAIN is
+    // read by apps/web/polkadot-app-deploy.config.ts so the published manifest's
+    // `domain` matches the label we're deploying to (publishManifest aborts otherwise).
     env: {
       ...process.env,
       MNEMONIC: seed,
-      BULLETIN_DEPLOY_DOMAIN: domain,
+      POLKADOT_APP_DEPLOY_DOMAIN: domain,
       NODE_OPTIONS: "--max-old-space-size=8192",
     },
   });
-  if (result.status !== 0) throw new Error("bulletin-deploy failed.");
+  if (result.status !== 0) throw new Error(`${PUBLISH_BIN} failed.`);
 }
 
 /**
- * bulletin-deploy 0.8.x prefers a paired mobile (QR `login`) session over the
+ * polkadot-app-deploy prefers a paired mobile (QR `login`) session over the
  * MNEMONIC we pass — so a leftover session would publish and register the .dot as
  * a DIFFERENT account than the wallet we just deployed from. If one exists, offer
  * to clear it so the publish uses the mnemonic (the single-secret design).
@@ -259,7 +264,7 @@ async function ensureMnemonicSigner(rl: Interface, command: string[]): Promise<v
   if (!existsSync(SSO_SESSION_FILE)) return;
   ui.section("Signer");
   ui.warn(
-    "A saved bulletin-deploy mobile session exists; v0.8.x will use it to publish " +
+    "A saved polkadot-app-deploy mobile session exists; it will be used to publish " +
       "(and register the .dot) instead of your deploy mnemonic.",
   );
   ui.choice(1, "Log out and publish with the mnemonic (recommended; clears the saved login)");
@@ -268,14 +273,14 @@ async function ensureMnemonicSigner(rl: Interface, command: string[]): Promise<v
   if (choice !== "1") return;
   const [bin, ...prefixArgs] = command;
   const result = spawnSync(bin, [...prefixArgs, "logout"], { cwd: REPO_ROOT, stdio: "inherit" });
-  if (result.status !== 0) ui.warn("`bulletin-deploy logout` failed — the session may still be used.");
+  if (result.status !== 0) ui.warn("`polkadot-app-deploy logout` failed — the session may still be used.");
   else ui.success("Session cleared — publishing with the mnemonic.");
 }
 
 async function main(): Promise<void> {
   await cryptoWaitReady();
   ui.banner("LOCALDOT", "one-shot deploy · contract + frontend → .dot");
-  const bulletinDeploy = resolveBulletinDeployCommand();
+  const publishCmd = resolvePublishCommand();
 
   const rl = createInterface({ input: process.stdin, output: process.stdout });
   try {
@@ -283,14 +288,17 @@ async function main(): Promise<void> {
     const { ss58, h160 } = deriveAccount(seed);
 
     ui.section("Funding");
-    ui.info(`Send testnet PAS to this address on ${NETWORK.displayName}:`);
+    ui.info(`Send SUM to this address on ${NETWORK.displayName}:`);
     ui.kvBlock([
       ["SS58", ss58],
       ["H160", h160],
-      ["Faucet", "https://faucet.polkadot.io/?parachain=1500"],
     ]);
     ui.info(
-      `(needs at least ${MIN_FUNDING_PAS} PAS for the contract deploy and the .dot registration)`,
+      "Summit has no public faucet — fund this address from a Summit source account " +
+        `(transfer SUM over the Asset Hub WSS).`,
+    );
+    ui.info(
+      `(needs at least ${MIN_FUNDING_SUM} SUM for the contract deploy and the .dot registration)`,
     );
 
     // Re-check on-chain balance after each "funded" confirmation. Under the
@@ -301,15 +309,15 @@ async function main(): Promise<void> {
       ui.step("Checking on-chain balance…");
       try {
         const { planck, decimals, symbol } = await fetchBalance(ss58);
-        const needed = BigInt(MIN_FUNDING_PAS) * 10n ** BigInt(decimals);
+        const needed = BigInt(MIN_FUNDING_SUM) * 10n ** BigInt(decimals);
         const human = `${formatPas(planck, decimals)} ${symbol}`;
         if (planck >= needed) {
           ui.success(`Balance ${human} — enough to continue.`);
           break;
         }
         ui.warn(
-          `Balance ${human} is below the ${MIN_FUNDING_PAS} ${symbol} needed — ` +
-            "top up at the faucet, then press Enter to re-check.",
+          `Balance ${human} is below the ${MIN_FUNDING_SUM} ${symbol} needed — ` +
+            "top up from a Summit source account, then press Enter to re-check.",
         );
       } catch (error) {
         ui.warn(
@@ -344,8 +352,8 @@ async function main(): Promise<void> {
     }
 
     runBuild(domain);
-    await ensureMnemonicSigner(rl, bulletinDeploy);
-    publishDapp(bulletinDeploy, domain, seed);
+    await ensureMnemonicSigner(rl, publishCmd);
+    publishDapp(publishCmd, domain, seed);
 
     const name = domain.replace(/\.dot$/, "");
     ui.notice(

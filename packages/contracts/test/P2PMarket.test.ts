@@ -351,7 +351,7 @@ describe('P2PMarket', function () {
         expect(agent.stakedAmount).to.equal(0n);
       });
 
-      it('should hold the staked PAS in the contract', async function () {
+      it('should hold the staked tokens in the contract', async function () {
         const stakeAmount = ethers.parseEther('10');
         const balanceBefore = await ethers.provider.getBalance(await market.getAddress());
         await market.connect(agent1).registerAgent('Agent', 'QmA', 5n, 4n, 0n, { value: stakeAmount });
@@ -408,7 +408,7 @@ describe('P2PMarket', function () {
         expect(agent.stakedAmount).to.equal(ethers.parseEther('6'));
       });
 
-      it('should transfer PAS to agent', async function () {
+      it('should transfer tokens to agent', async function () {
         const withdrawAmount = ethers.parseEther('4');
         const balanceBefore = await ethers.provider.getBalance(agent1.address);
         const tx = await market.connect(agent1).unstakeInsurance(withdrawAmount);

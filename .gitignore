@@ -48,7 +48,7 @@ out/
 .env.local
 .env.production
 .env*.local
-.env.paseo
+.env.summit
 !.env.example
 
 # IDE
@@ -91,7 +91,7 @@ packages/contracts/bin/
 # Bulletin Chain local testnet
 zombienet/bin/
 zombienet/data/
-*.env.paseo
+*.env.summit
 
-# Bulletin deploy artifacts (CAR bundles produced by bulletin-deploy)
+# Bulletin deploy artifacts (CAR bundles produced by polkadot-app-deploy)
 *.car

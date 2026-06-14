@@ -31,36 +31,36 @@ not Foundry. The `foundry-testing/` skill is generic reference only — use Hard
 
 ### 2. Polkadot Specifics
 
-This product targets **Paseo Next v2** (Asset Hub Next). Native token is **PAS**
+This product targets **Summit** (Summit Asset Hub). Native token is **SUM**
 (10 decimals). There is no Previewnet and no local Anvil — local dev is the
 Hardhat in-process network.
 
 | Concept | Polkadot (this repo) | Ethereum Equivalent |
 |---------|----------------------|---------------------|
-| Native token | PAS | ETH |
+| Native token | SUM | ETH |
 | Dev network | Hardhat (in-process) | Hardhat |
-| Testnet | Paseo Next v2 (Asset Hub Next) | Sepolia |
+| Testnet | Summit (Summit Asset Hub) | Sepolia |
 | Chain ID (local) | 31337 | 31337 |
 | Chain ID (testnet) | 420420417 | 11155111 |
-| eth-rpc (testnet) | `https://eth-rpc-paseo-next.polkadot.io` | — |
-| Block explorer | Blockscout (`https://blockscout-paseo-next.polkadot.io`) | Etherscan |
+| eth-rpc (testnet) | `http://localhost:8545` | — |
+| Block explorer | Blockscout (`<no Summit explorer yet>`) | Etherscan |
 | Block time | ~6 seconds | ~12 seconds |
 
 ### 3. Development Workflow
 
 ```
-Hardhat (local, in-process) -> Paseo Next v2 (Asset Hub Next testnet) -> Mainnet (TBD)
+Hardhat (local, in-process) -> Summit (Summit Asset Hub testnet) -> Mainnet (TBD)
         (fast)                          (public, faucet)                    (prod)
 ```
 
 ### 4. Deployment Protocol
 
-Deploy with the Hardhat scripts against the `paseo` network (chainId 420420417):
+Deploy with the Hardhat scripts against the `summit` network (chainId 420420417):
 
 ```bash
 pnpm --filter @localdot/contracts compile
-hardhat run scripts/deploy.ts --network paseo            # deploys P2PMarket
-hardhat run scripts/deploy-zkpassport.ts --network paseo # deploys ZKPassportRegistry
+hardhat run scripts/deploy.ts --network summit            # deploys P2PMarket
+hardhat run scripts/deploy-zkpassport.ts --network summit # deploys ZKPassportRegistry
 ```
 
 `scripts/deploy.ts` deploys only P2PMarket and writes its address to
@@ -100,9 +100,9 @@ git branch
 
 ```bash
 # Deployment (writes addresses to apps/web/.env.local + .github/env)
-hardhat run scripts/deploy.ts --network paseo
-hardhat run scripts/deploy-zkpassport.ts --network paseo
-hardhat run scripts/seed.ts --network paseo   # registers demo agents + offers
+hardhat run scripts/deploy.ts --network summit
+hardhat run scripts/deploy-zkpassport.ts --network summit
+hardhat run scripts/seed.ts --network summit   # registers demo agents + offers
 
 # Git (write)
 git add
@@ -166,7 +166,7 @@ p2p-market/
 
 | Rule | Enforcement | Status |
 |------|-------------|--------|
-| Primary chain: Paseo Next v2 (Asset Hub Next), chainId 420420417 | Development target | MANDATORY |
+| Primary chain: Summit (Summit Asset Hub), chainId 420420417 | Development target | MANDATORY |
 | Production chain: Polkadot Asset Hub | Mainnet target (TBD) | MANDATORY |
 | No Moonbeam | Use Asset Hub EVM instead | FORBIDDEN |
 
@@ -186,7 +186,7 @@ p2p-market/
 > gaps. They do **not** inherit OpenZeppelin (it is an unused devDependency).
 > Reentrancy uses a custom `noReentrant` single-bool guard; access control is
 > per-function `msg.sender` checks (no owner/admin/Ownable). Escrow holds the
-> **native token** (PAS) via `msg.value` / `.call{value:}` — there is no ERC-20.
+> **native token** (SUM) via `msg.value` / `.call{value:}` — there is no ERC-20.
 > Treat any UUPS / `_disableInitializers` / proxy-upgrade guidance below as
 > generic reference only; it does not apply here.
 
@@ -264,9 +264,9 @@ pnpm build             # Must build
 2. **Fetch binary** - `pnpm download:binaries` (resolc), once
 3. **Compile** - `pnpm --filter @localdot/contracts compile`
 4. **Test locally** - Hardhat in-process network (chainId 31337)
-5. **Deploy Paseo** - `hardhat run scripts/deploy.ts --network paseo` (chainId 420420417)
-6. **Deploy registry** - `hardhat run scripts/deploy-zkpassport.ts --network paseo`
-7. **Verify** - Blockscout (`https://blockscout-paseo-next.polkadot.io`)
+5. **Deploy Summit** - `hardhat run scripts/deploy.ts --network summit` (chainId 420420417)
+6. **Deploy registry** - `hardhat run scripts/deploy-zkpassport.ts --network summit`
+7. **Verify** - Blockscout (`<no Summit explorer yet>`)
 
 ### For Frontend Deployment
 
@@ -287,9 +287,9 @@ pnpm build             # Must build
 | Over-engineering | Wasted effort | Build what's requested |
 | Premature abstraction | Unclear patterns | Wait for rule of 3 |
 | Add a proxy / UUPS to these contracts | They are non-upgradeable by design | Deploy a fresh contract |
-| ERC-20 escrow logic | Escrow holds native PAS | `msg.value` / `.call{value:}` |
+| ERC-20 escrow logic | Escrow holds native SUM | `msg.value` / `.call{value:}` |
 | Hardcode addresses | Not portable | Use `.env` |
-| Deploy to mainnet first | Costly mistakes | Paseo Next v2 testnet first |
+| Deploy to mainnet first | Costly mistakes | Summit testnet first |
 | Commit `.env` | Secret exposure | Use `.gitignore` |
 | `console.log` in production frontend | Style violation | Remove before deploy |
 
@@ -299,7 +299,7 @@ pnpm build             # Must build
 
 - **Architecture**: See [`CLAUDE.md`](../CLAUDE.md) in project root
 - **Domain Knowledge**: See `.claude/skills/`
-- **Network Config**: see [`hardhat.config.ts`](../packages/contracts/hardhat.config.ts) (chainId 420420417, eth-rpc `https://eth-rpc-paseo-next.polkadot.io`) and [`apps/web/src/env.ts`](../apps/web/src/env.ts)
+- **Network Config**: see [`hardhat.config.ts`](../packages/contracts/hardhat.config.ts) (chainId 420420417, eth-rpc `http://localhost:8545`) and [`apps/web/src/env.ts`](../apps/web/src/env.ts)
 
 ---
 

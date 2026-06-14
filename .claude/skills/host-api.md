@@ -51,7 +51,7 @@ pnpm add @novasamatech/sdk-statement@0.6.0
 |---------|---------|
 | `@novasamatech/host-api` | Protocol, types, error definitions, `enumValue` helper |
 | `@novasamatech/host-api-wrapper` | Embedded-side wrapper: `accounts`, `hostApi`, `requestPermission` |
-| `@novasamatech/sdk-statement` | Statement Store subscribe client (over People Next JSON-RPC) |
+| `@novasamatech/sdk-statement` | Statement Store subscribe client (over Summit People JSON-RPC) |
 
 > **Not used in this repo:** `@novasamatech/product-sdk` (and its
 > `sandboxProvider` / `metaProvider` / `createAccountsProvider`). Those are kept
@@ -135,7 +135,7 @@ const productAccount = result.match(
 const signer = accounts.getProductAccountSigner(productAccount, "createTransaction");
 ```
 
-**Why the `createTransaction` slot (not the legacy `signPayload`):** Asset Hub Next
+**Why the `createTransaction` slot (not the legacy `signPayload`):** Summit Asset Hub
 declares custom signed extensions (`AuthorizeCall`, `AsPgas`, `AsRingAlias`,
 `EthSetOrigin`, …). The legacy `signPayload` builder only knows a hardcoded minimal
 extension set and silently drops `EthSetOrigin` (the EVM/H160 origin needed for
@@ -159,7 +159,7 @@ Before any host-mediated write, LocalDOT runs `ensureBootstrap` once per session
 |-------|-------|------------|
 | `getProductAccount` hangs | User not signed in | Show "Sign in to Triangle" message |
 | `BadProof` on `Revive.call` | Legacy `signPayload` slot drops `EthSetOrigin` | Use the `createTransaction` signer slot |
-| People Next WebSocket fails | Testnet infrastructure | Wait/retry, report to Triangle team |
+| Summit People WebSocket fails | Testnet infrastructure | Wait/retry, report to Triangle team |
 
 ## Key Concepts
 
@@ -211,7 +211,7 @@ Products are loaded from IPFS via `.dot` domain resolution:
 **auto-signing** of `Revive.call` writes — they are signed without a per-call modal.
 It does **NOT** sponsor gas. PGAS gas-sponsorship (the `AsPgas` signed extension) is
 not wired anywhere in product, SDK, or host, so contract writes still pay gas from
-the product-derived account. **That account must hold native balance** (PAS on the
+the product-derived account. **That account must hold native balance** (SUM on the
 testnet — fund it via faucet). Declining or `NotAvailable` on the allowance just
 falls back to a per-call signing prompt and must not break statement send/receive.
 

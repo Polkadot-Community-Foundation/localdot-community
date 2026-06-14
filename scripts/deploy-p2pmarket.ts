@@ -1,15 +1,15 @@
 /**
  * Deploy P2PMarket via pallet-revive instantiate_with_code (PAPI).
  *
- * LocalDOT's contract is normally deployed with Hardhat/ethers over the eth-rpc
+ * LocalDOT's contract can be deployed with Hardhat/ethers over a local eth-rpc adapter
  * proxy (see packages/contracts/scripts/deploy.ts). This module is the
  * Substrate-native path used by the one-shot interactive deploy (scripts/deploy.ts):
- * it signs the instantiate with the SAME 12/24-word mnemonic that bulletin-deploy
+ * it signs the instantiate with the SAME 12/24-word mnemonic that polkadot-app-deploy
  * later uses to publish the frontend, so a single secret takes an operator from
  * nothing to a live product.
  *
  * The deployer is supplied as a PolkadotSigner bundle derived from a mnemonic.
- * We do NOT call Revive.map_account: Asset Hub Next runs pallet-revive's
+ * We do NOT call Revive.map_account: Summit Asset Hub runs pallet-revive's
  * AutoMapper, so the SS58 ↔ H160 mapping is created on first use (the instantiate
  * itself). The deployer's H160 is keccak256(pubkey)[12:32] — pallet-revive's
  * `to_address` for a plain AccountId32 — which is the address AutoMapper assigns.
@@ -48,18 +48,18 @@ const WEB_ENV_PATH = resolve(REPO_ROOT, "apps/web/.env.local");
 const GAS_MULTIPLIER = 4n;
 const CONTRACT_LABEL = "P2PMarket";
 
-/** Target chain — Paseo Asset Hub Next (v2), where pallet-revive contracts live. */
+/** Target chain — Summit Asset Hub, where pallet-revive contracts live. */
 export const NETWORK = {
-  key: "paseo-next-v2",
-  displayName: "Paseo Asset Hub Next (v2)",
-  wsUrl: "wss://paseo-asset-hub-next-rpc.polkadot.io",
+  key: "summit",
+  displayName: "Summit Asset Hub",
+  wsUrl: "wss://summit-asset-hub-rpc.polkadot.io",
   genesisHash:
-    "0xbf0488dbe9daa1de1c08c5f743e26fdc2a4ecd74cf87dd1b4b1eeb99ae4ef19f",
-  /** EVM chainId surfaced to the app (display / wrong-network badge). */
+    "0xf388dc6d6cdf6fb77eac3c4a91f31bc0c8642b142f1a757512ab7849f9f70660",
+  /** EVM chainId surfaced to the app (display / wrong-network badge). NOT a network differentiator — the WSS endpoint + genesis are. */
   chainId: 420420417,
-  /** eth-rpc proxy — stored in .env.local for the app; not used for contract I/O. */
-  rpcUrl: "https://eth-rpc-paseo-next.polkadot.io",
-  nativeToken: { symbol: "PAS", decimals: 10 },
+  /** Stored in .env.local for the app's display only; not used for contract I/O. Summit has no hosted public eth-rpc endpoint. */
+  rpcUrl: "",
+  nativeToken: { symbol: "SUM", decimals: 10 },
 } as const;
 
 export interface DeployResult {
@@ -126,8 +126,8 @@ export function deriveAccount(seed: string): { ss58: string; h160: `0x${string}`
 }
 
 /**
- * Read the deployer's free balance on Asset Hub Next — the chain where the
- * deployer holds PAS and where the contract instantiates. Opens a short-lived
+ * Read the deployer's free balance on Summit Asset Hub — the chain where the
+ * deployer holds SUM and where the contract instantiates. Opens a short-lived
  * PAPI client so the interactive deploy can gate on funding before it spends.
  */
 export async function fetchBalance(
@@ -271,7 +271,7 @@ function upsertEnvFile(path: string, values: Record<string, string>): void {
 }
 
 /**
- * Deploy a fresh P2PMarket to Asset Hub Next and persist the resulting H160
+ * Deploy a fresh P2PMarket to Summit Asset Hub and persist the resulting H160
  * into apps/web/.env.local. Exported so the interactive orchestrator
  * (scripts/deploy.ts) can drive it in-process.
  */
@@ -290,7 +290,7 @@ export async function deployP2PMarket(deployer: Deployer): Promise<DeployResult>
   const client = createClient(getWsProvider(NETWORK.wsUrl));
   try {
     const api = client.getUnsafeApi();
-    // No Revive.map_account: Asset Hub Next's AutoMapper creates the SS58 -> H160
+    // No Revive.map_account: Summit Asset Hub's AutoMapper creates the SS58 -> H160
     // mapping on first use (this instantiate).
     const { contractAddress, txHash } = await deployContract(api, signer, ss58, dryRunDeposit);
 

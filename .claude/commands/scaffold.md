@@ -171,8 +171,8 @@ pnpm add -D tailwindcss postcss autoprefixer @types/react @types/react-dom \
   @types/leaflet @vitejs/plugin-react @polkadot-api/cli @playwright/test vite
 npx tailwindcss init -p
 
-# Generate PAPI descriptors for the Paseo Next v2 chains (WSS, not bundled Smoldot
-# light-client specs): paseohubnext / bulletinnext / peoplenext, output to apps/web/.papi/
+# Generate PAPI descriptors for the Summit chains (WSS, not bundled Smoldot
+# light-client specs): summitassethub / summitbulletin / summitpeople, output to apps/web/.papi/
 # (papi runs as part of `pnpm --filter @localdot/web build`).
 
 # Return to root and install all deps
@@ -189,7 +189,7 @@ pnpm install
 - [ ] Write [`ZKPassportRegistry.sol`](../../packages/contracts/contracts/ZKPassportRegistry.sol) — on-chain proof-of-personhood registry
 - [ ] Write contract tests (happy path, 24h refund timeout, agent-mediated + direct paths, edge cases) via `hardhat test`
 - [ ] Deploy to local Hardhat node (chainId 31337)
-- [ ] Deploy to Asset Hub Next testnet (chainId 420420417, `https://eth-rpc-paseo-next.polkadot.io`)
+- [ ] Deploy to Summit Asset Hub testnet (chainId 420420417, `http://localhost:8545`)
 
 ## Phase 1 Acceptance Criteria
 
@@ -198,5 +198,5 @@ pnpm install
 - [ ] `turbo test` passes with 100% contract coverage (`hardhat coverage`)
 - [ ] `turbo lint` passes with zero errors/warnings (`solhint` for contracts)
 - [ ] `turbo typecheck` passes with zero errors
-- [ ] `P2PMarket` deployed to Asset Hub Next with a verified address (Blockscout: `https://blockscout-paseo-next.polkadot.io`)
+- [ ] `P2PMarket` deployed to Summit Asset Hub with a verified address (Blockscout: `<no Summit explorer yet>`)
 - [ ] All contract functions have NatSpec documentation

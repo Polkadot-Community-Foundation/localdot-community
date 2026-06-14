@@ -28,7 +28,7 @@ The marketplace has three roles — **Buyer**, **Provider**, and **Handoff Agent
 | **Polkadot Triangle** | Polkadot's app paradigm: a **Host** (wallet app, e.g. Polkadot desktop or dot.li) runs **Products** (mini-apps) in a sandbox and lends them its signer. LocalDOT is a Product. |
 | **Statement Store** | Decentralized topic-routed messaging (People chain). LocalDOT uses it for trade **request / accept-decline / meetup proposals / live status** — **not** open chat. Cleartext in V1. |
 | **Bulletin Chain** | Ephemeral bulk storage (offer metadata, profile photos, handover videos), content-addressed by CID and fetched via an IPFS gateway. |
-| **Token** | The digital token being exchanged. **V1 trades a single token** priced at \$1; the deployed escrow moves the chain-native token (PAS on testnet), priced \$1. No specific token brand is assumed — a fork can trade any token. |
+| **Token** | The digital token being exchanged. **V1 trades a single token** priced at \$1; the deployed escrow moves the chain-native token (SUM on Summit), priced \$1. No specific token brand is assumed — a fork can trade any token. |
 | **ZKPassport** | Optional proof-of-personhood: an off-chain zero-knowledge passport proof; only a one-way hash is recorded on-chain (`ZKPassportRegistry`). Replaces the old "DIM1 / PoP" placeholder. |
 | **Contextual Alias** | Privacy-preserving per-context identifier (a user appears under a per-context nickname). |
 | **Escrow** | The on-chain hold-and-release mechanism inside `P2PMarket.sol`; holds the **native token** via `msg.value`. |
@@ -37,7 +37,7 @@ The marketplace has three roles — **Buyer**, **Provider**, and **Handoff Agent
 
 ## Non-Negotiable Rules
 
-1. **Zero backend / zero server** — all state lives on-chain (Asset Hub Next) or in ephemeral chain storage (Bulletin Next).
+1. **Zero backend / zero server** — all state lives on-chain (Summit Asset Hub) or in ephemeral chain storage (Summit Bulletin).
 2. **No IPFS pinning service** — Bulletin Chain stores blobs; an IPFS *gateway* is used only to read them back by CID.
 3. **Polkadot-native only** — Triangle primitives; Host-injected signer.
 4. **Privacy-preserving** — contextual aliases, optional ZKPassport, no KYC.
@@ -55,7 +55,7 @@ The marketplace has three roles — **Buyer**, **Provider**, and **Handoff Agent
 | State | React Context + TanStack Query + Dexie (local message store) |
 | Styling | Tailwind CSS — dark, warm **stone** palette; DM Sans / DM Serif / JetBrains Mono (see [.interface-design/system.md](.interface-design/system.md)) |
 | Wallet / signing | **Host-injected** via `@novasamatech/host-api-wrapper` — `accounts.getProductAccount(host, 0)` + `getProductAccountSigner(account, "createTransaction")` |
-| Chain API | **PAPI** (`polkadot-api` v2) over **WSS** descriptors (`paseohubnext`, `bulletinnext`, `peoplenext`) — NOT bundled Smoldot specs |
+| Chain API | **PAPI** (`polkadot-api` v2) over **WSS** descriptors (`summitassethub`, `summitbulletin`, `summitpeople`) — NOT bundled Smoldot specs |
 | Contracts | Solidity `^0.8.28` → **Revive** (`resolc`) → **PolkaVM**; built/tested with **Hardhat** + `@parity/hardhat-polkadot` |
 | Contract calls | `ReviveApi.call` (reads, dry-run) and `Revive.call` extrinsic (writes) via PAPI. `ethers` v6 is used **only** to ABI encode/decode calldata — never as a wallet or RPC transport. |
 | Messaging | Statement Store (`@novasamatech/sdk-statement`), host-submitted publish, direct-RPC subscribe |
@@ -89,7 +89,7 @@ Records one attestation per wallet: `Attestation { uniqueIdHash (keccak256), ver
 
 ### Toolchain notes
 
-- `hardhat.config.ts`: solc `0.8.28`, `optimizer.runs = 200`, `viaIR: true`, `resolc.compilerSource: 'binary'` + `resolcPath: './bin/resolc'`. Networks: `hardhat` (local, chainId 31337) and `paseo` (AH Next, chainId 420420417, `https://eth-rpc-paseo-next.polkadot.io`), blockscout verify configured.
+- `hardhat.config.ts`: solc `0.8.28`, `optimizer.runs = 200`, `viaIR: true`, `resolc.compilerSource: 'binary'` + `resolcPath: './bin/resolc'`. Networks: `hardhat` (local, chainId 31337) and `summit` (Summit AH, chainId 420420417, URL `SUMMIT_RPC_URL` or `http://localhost:8545` — Summit has no hosted eth-rpc, so run a local revive adapter). No blockscout verify (Summit has no public explorer yet).
 - Deploy: `pnpm contracts:deploy` runs `scripts/deploy.ts` (deploys **only** `P2PMarket`, writes addresses into `apps/web/.env.local` + `.github/env`). `scripts/deploy-zkpassport.ts` deploys the registry separately. `pnpm contracts:seed` registers 2 demo agents + 10 offers.
 - Run `pnpm download:binaries` once to fetch the `resolc` PolkaVM compiler binary.
 
@@ -211,20 +211,20 @@ There is **no** protocol fee, no global minimum trade amount, and no on-chain ev
 
 ---
 
-## Target Networks — Paseo Next v2 stack
+## Target Networks — Summit stack
 
 Default chain config lives in [apps/web/src/lib/constants.ts](apps/web/src/lib/constants.ts).
 
-| Environment | EVM RPC (eth-rpc) | Substrate WSS |
-|-------------|-------------------|---------------|
+| Environment | EVM eth-rpc | Substrate WSS |
+|-------------|-------------|---------------|
 | Local Dev (Hardhat) | `http://127.0.0.1:8545` (chainId 31337) | (n/a) |
-| Asset Hub Next | `https://eth-rpc-paseo-next.polkadot.io` (chainId **420420417**) | `wss://paseo-asset-hub-next-rpc.polkadot.io` |
-| Bulletin Next | (n/a) | `wss://paseo-bulletin-next-rpc.polkadot.io` |
-| People Next System | (n/a) | `wss://paseo-people-next-system-rpc.polkadot.io` |
-| Explorer | `https://blockscout-paseo-next.polkadot.io` | |
+| Asset Hub | local revive adapter `http://localhost:8545` → AH WSS (no hosted eth-rpc; chainId **420420417**) | `wss://summit-asset-hub-rpc.polkadot.io` |
+| Bulletin | (n/a) | `wss://summit-bulletin-rpc.polkadot.io` |
+| People | (n/a) | `wss://summit-people-rpc.polkadot.io` |
+| Explorer | none yet | |
 | Mainnet | TBD | TBD |
 
-Native token on Paseo: **PAS** (10 decimals). None of these chains are bundled as Smoldot light-client specs — we connect over WSS via PAPI descriptors generated under `apps/web/.papi/descriptors/`.
+Native token on Summit: **SUM** (10 decimals). Summit has **no hosted public eth-rpc** and **no public block explorer** yet — the primary contract-deploy path is PAPI/pallet-revive over WSS (no adapter needed). None of these chains are bundled as Smoldot light-client specs — we connect over WSS via PAPI descriptors generated under `apps/web/.papi/descriptors/`.
 
 ---
 
@@ -263,25 +263,25 @@ Native token on Paseo: **PAS** (10 decimals). None of these chains are bundled a
 ## Environment Variables
 
 ```bash
-# apps/web/.env.local  (all have sensible Paseo Next defaults; see env.ts)
+# apps/web/.env.local  (all have sensible Summit defaults; see env.ts)
 VITE_P2PMARKET_ADDRESS=                  # P2PMarket H160 (written by deploy.ts)
 VITE_ZKPASSPORT_REGISTRY_ADDRESS=        # ZKPassportRegistry H160 (deploy-zkpassport.ts)
 VITE_CHAIN_ID=420420417                  # EVM chainId (display / wrong-network badge)
-VITE_RPC_URL=https://eth-rpc-paseo-next.polkadot.io   # stored; NOT used for contract I/O
-VITE_NETWORK=                            # host-routed chain set — Asset Hub / People / Bulletin (default: paseo-next-v2; see lib/host/networks.ts)
-VITE_IPFS_GATEWAY=                       # Bulletin IPFS gateway, standalone reads only (default: paseo-bulletin-next-ipfs)
+VITE_RPC_URL=                            # display only; NOT used for contract I/O (Summit has no hosted eth-rpc)
+VITE_NETWORK=                            # host-routed chain set — Asset Hub / People / Bulletin (default: summit; see lib/host/networks.ts)
+VITE_IPFS_GATEWAY=                       # Bulletin IPFS gateway, standalone reads only (default: https://summit-ipfs.polkadot.io/ipfs/)
 VITE_READONLY_ORIGIN=                    # SS58 origin for read-only ReviveApi.call (default: Alice)
 VITE_USE_HOST_API=                       # set "false" to force standalone mode
 VITE_ZKPASSPORT_DOMAIN=                  # zk proof domain (default: demo.zkpassport.id)
 
-# packages/contracts/.env
+# packages/contracts/.env  (Hardhat deploy/verify/seed path only)
 PRIVATE_KEY=                             # deployer key
-PASEO_RPC_URL=                           # optional override (default: eth-rpc-paseo-next)
+SUMMIT_RPC_URL=                          # optional override (default: http://localhost:8545 — a local revive eth-rpc adapter → wss://summit-asset-hub-rpc.polkadot.io)
 AGENT1_KEY= AGENT2_KEY= PROVIDER1_KEY= PROVIDER2_KEY=   # seed accounts (for `seed`)
 ```
 
 **Notes:**
-- Asset Hub Next runs pallet-revive's **AutoMapper**, so SS58 ↔ H160 mapping happens automatically on first account use. We do **not** call `Revive.map_account`.
+- Summit Asset Hub runs pallet-revive's **AutoMapper**, so SS58 ↔ H160 mapping happens automatically on first account use. We do **not** call `Revive.map_account`.
 - **PGAS gas-sponsorship is NOT wired.** The Host's `SmartContractAllowance` only **auto-signs** `Revive.call` writes — it does not pay gas. The product-derived account must hold native balance (faucet on testnet) for any contract write. `InvalidTransaction::Payment` on an offer = empty account, not a sponsorship bug.
 - Contract writes go through PAPI `Revive.call` signed by the Host's `createTransaction` signer — `VITE_RPC_URL` (the eth-rpc proxy) is stored but unused by the contract layer.
 
@@ -293,7 +293,7 @@ The polished pitch is ahead of what the contracts currently enforce. Keep these 
 
 | Area | Reality today | Future |
 |------|---------------|--------|
-| **Token / stablecoin** | Escrow moves the chain-native token (PAS), priced \$1. No specific token brand is assumed. | Integrate a real stablecoin or other token (likely ERC-20 / asset). |
+| **Token / stablecoin** | Escrow moves the chain-native token (SUM), priced \$1. No specific token brand is assumed. | Integrate a real stablecoin or other token (likely ERC-20 / asset). |
 | **Agent slashing** | Stake is staked, shown, and frozen during active trades, but **never slashed** — no `DEFAULTED` state, no `claimAgentDefault`. Signaling only. | Add `DEFAULTED` + pickup-timeout slash of `min(amount, stake)` to the provider. |
 | **Disputes / reputation** | None on-chain. Safety = escrow + 24h timeout + mutual cancel. | Dispute resolution; ReputationCore. |
 | **Multi-asset / currency** | One token, USD only. | Multiple assets / fiat currencies. |

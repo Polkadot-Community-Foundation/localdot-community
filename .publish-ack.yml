@@ -38,7 +38,7 @@ accepts:
     location: README.md, .github/env, apps/web/src/lib/constants.ts
     finding: Default WSS/RPC/IPFS endpoints point at *.polkadot.io hosts.
     reason: >-
-      Public Paseo Next v2 testnet endpoints, required for the app to function
+      Public Summit testnet endpoints, required for the app to function
       out of the box. Not internal infrastructure.
     mitigation: Documented as public testnet defaults; overridable via env.
     accepted_by: Dragan Milosevic (maintainer)
@@ -49,7 +49,7 @@ accepts:
     finding: >-
       VITE_P2PMARKET_ADDRESS / VITE_ZKPASSPORT_REGISTRY_ADDRESS are populated.
     reason: >-
-      Public on-chain H160 addresses of the reference deployment on Paseo Next;
+      Public on-chain H160 addresses of the reference deployment on Summit;
       not secrets.
     mitigation: None needed; public data.
     accepted_by: Dragan Milosevic (maintainer)

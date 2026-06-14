@@ -2,7 +2,7 @@
  * Canonical DotNS product identifier used for host product-account signing.
  *
  * The host knows this product by its **bare** registered domain (e.g.
- * `mylocaldot.dot`) — the domain the manifest is published on. bulletin-deploy
+ * `mylocaldot.dot`) — the domain the manifest is published on. polkadot-app-deploy
  * publishes the runnable app on the `app.<domain>` subname while the manifest
  * lives on the bare domain, so at runtime `window.location.host` can be
  * `app.<domain>` (or the bare domain) depending on how the host loaded the page.

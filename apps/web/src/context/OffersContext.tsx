@@ -51,7 +51,7 @@ function offersReducer(state: OffersState, action: OffersAction): OffersState {
 /**
  * Helper function to map contract offer to frontend offer type
  * Fetches and parses metadata JSON from Bulletin Chain (IPFS gateway)
- * @param decimals Chain-specific token decimals (18 local, 10 Paseo)
+ * @param decimals Chain-specific token decimals (18 local, 10 Summit)
  */
 const OFFER_TYPE_BUY = 1;
 

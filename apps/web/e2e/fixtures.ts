@@ -1,11 +1,27 @@
 import { test as base, expect } from "@playwright/test";
 import {
   createTestHostFixture,
-  PASEO_ASSET_HUB,
+  type ChainConfig,
+  type HexString,
   type TestHost,
 } from "@parity/host-api-test-sdk/playwright";
 
 const PRODUCT_URL = "http://localhost:5199";
+
+// The mock host routes chain connections by genesis hash, so the fixture's chain
+// MUST carry the SAME genesis the app requests (activeNetwork.assetHubGenesis in
+// apps/web/src/lib/host/networks.ts) — otherwise host routing rejects it with
+// "Host doesn't support it". The test SDK does not bundle a Summit chain, so we
+// declare the Summit chain inline here.
+const SUMMIT_ASSET_HUB: ChainConfig = {
+  id: "summit-asset-hub",
+  name: "Summit Asset Hub",
+  genesisHash:
+    "0xf388dc6d6cdf6fb77eac3c4a91f31bc0c8642b142f1a757512ab7849f9f70660" as HexString,
+  rpcUrl: "wss://summit-asset-hub-rpc.polkadot.io",
+  tokenSymbol: "SUM",
+  tokenDecimals: 10,
+};
 
 // LocalDOT derives its DotNS identifier from `window.location.host`, so under
 // Playwright the product account key is `localhost:5199/0`. We also map the
@@ -14,9 +30,9 @@ const PRODUCT_URL = "http://localhost:5199";
 const bobFixture = createTestHostFixture({
   productUrl: PRODUCT_URL,
   accounts: ["bob"],
-  chain: PASEO_ASSET_HUB,
+  chain: SUMMIT_ASSET_HUB,
   productAccounts: {
-    "localdot.dot/0": "bob",
+    "localmarket.dot/0": "bob",
     "localhost:5199/0": "bob",
   },
 });

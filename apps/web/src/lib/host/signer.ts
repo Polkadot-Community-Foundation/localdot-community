@@ -1,5 +1,5 @@
 /**
- * Host API signer — Paseo Next v2 / Polkadot Desktop 0.7.9+ / Polkadot App iOS v2.
+ * Host API signer — Summit / Polkadot Desktop 0.7.9+ / Polkadot App iOS v2.
  *
  * Uses the product-account flow with the modern `createTransaction` slot:
  *  - `accounts.getProductAccount(getProductIdentifier(), 0)` resolves the
@@ -10,11 +10,11 @@
  *  - `accounts.getProductAccountSigner(account, 'createTransaction')` returns a
  *    `PolkadotSigner` whose `signTx` forwards EVERY signed-extension's real
  *    `extra` + `additionalSigned` bytes (computed by PAPI against the live
- *    Asset Hub Next metadata) to `host.createTransaction`. The host rebuilds
+ *    Summit Asset Hub metadata) to `host.createTransaction`. The host rebuilds
  *    and signs the extrinsic from those exact bytes.
  *
  * Why not the legacy `signPayload` slot:
- *  Asset Hub Next declares custom signed-extensions — `AuthorizeCall`,
+ *  Summit Asset Hub declares custom signed-extensions — `AuthorizeCall`,
  *  `AsPgas`, `AsRingAlias`, `EthSetOrigin`, … — that PAPI's pjs-signer can't
  *  encode. The old workaround zeroed those out and relied on the iOS app to
  *  reconstruct them from its own runtime metadata, but the iOS legacy

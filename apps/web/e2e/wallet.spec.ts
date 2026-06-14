@@ -37,9 +37,9 @@ test.describe("Wallet connects via host", () => {
 
   test("chain badge shows the configured chain name", async ({ testHost }) => {
     const frame = await waitForAppReady(testHost);
-    // VITE_CHAIN_ID defaults to Paseo Asset Hub Next (420420417).
+    // VITE_CHAIN_ID defaults to Summit Asset Hub (420420417).
     await expect(
-      frame.getByText("Paseo Asset Hub Next").first(),
+      frame.getByText("Summit Asset Hub").first(),
     ).toBeVisible({ timeout: 30_000 });
   });
 });
