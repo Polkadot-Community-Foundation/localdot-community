@@ -53,7 +53,7 @@ const GATEWAY_BASE = process.env.DOTNS_GATEWAY_BASE ?? "dot.li";
 // storage deposit and the .dot registration; the dry-run computes the exact
 // contract cost, this is just a pre-flight gate. SUM has 10 decimals.
 const MIN_FUNDING_SUM = 20;
-// The scoped publish CLI. polkadot-app-deploy@0.10.1 carries the `summit` env
+// The scoped publish CLI. polkadot-app-deploy@0.11.0 carries the `summit` env
 // (Summit Asset Hub / Bulletin / RPCs + the summit-ipfs gateway) and the manifest
 // direct-signer fix; the unscoped legacy `polkadot-app-deploy` does not ship `summit`.
 const PUBLISH_PACKAGE = "@polkadot-community-foundation/polkadot-app-deploy";
@@ -104,7 +104,7 @@ function isUsableVersion(version: string | null): version is string {
 /**
  * Ensure a recent polkadot-app-deploy is available. If a good one is already on
  * the machine, use it. If it's missing or too old, install the pinned version
- * globally (`npm i -g @polkadot-community-foundation/polkadot-app-deploy@0.10.1`)
+ * globally (`npm i -g @polkadot-community-foundation/polkadot-app-deploy@0.11.0`)
  * so this and future deploys reuse it. The floor guarantees the `summit` env is
  * present. Only if a global install isn't possible (e.g. no write access to the
  * global prefix) do we fall back to a throwaway `npx` fetch. Returns the argv
