@@ -95,7 +95,7 @@ The same mnemonic signs the contract instantiate **and** is handed to `polkadot-
 
 - **Node 22+ and pnpm** (already required for the repo).
 - **IPFS (kubo)** is optional — if it isn't on your `PATH`, the deploy falls back to polkadot-app-deploy's pure-JS merkleizer (`--js-merkle`). Installing kubo just speeds up large publishes.
-- Everything else is automatic: if a recent `polkadot-app-deploy` isn't already on your machine, the deploy installs the pinned version globally (`npm i -g @polkadot-community-foundation/polkadot-app-deploy@0.10.1`), falling back to a throwaway `npx` fetch only if the global install isn't possible. The `resolc` contract compiler (~170 MB) is downloaded on first run.
+- Everything else is automatic: if a recent `polkadot-app-deploy` isn't already on your machine, the deploy installs the pinned version globally (`npm i -g @polkadot-community-foundation/polkadot-app-deploy@0.11.0`), falling back to a throwaway `npx` fetch only if the global install isn't possible. The `resolc` contract compiler (~170 MB) is downloaded on first run.
 
 ### What it writes
 
